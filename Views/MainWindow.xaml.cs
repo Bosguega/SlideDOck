@@ -15,6 +15,19 @@ namespace SlideDOck.Views
             Left = 0;
             Top = 0;
             Height = SystemParameters.WorkArea.Height;
+
+            // Adiciona handler para o evento de fechamento
+            Closing += MainWindow_Closing;
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // Salva a configuração antes de fechar
+            if (DataContext is ViewModels.MainViewModel mainViewModel)
+            {
+                System.Diagnostics.Debug.WriteLine("Salvando configuração ao fechar janela...");
+                // O salvamento já é feito automaticamente nos métodos
+            }
         }
 
         private void MainWindow_Drop(object sender, DragEventArgs e)
@@ -78,6 +91,13 @@ namespace SlideDOck.Views
             {
                 viewModel.AddAppFromFile(filePath);
             }
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Salva antes de fechar
+            System.Diagnostics.Debug.WriteLine("Botão fechar clicado, salvando...");
+            Close();
         }
     }
 }

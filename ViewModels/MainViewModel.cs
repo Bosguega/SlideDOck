@@ -1,4 +1,6 @@
 ﻿using SlideDOck.Models;
+using SlideDOck.Commands;
+using SlideDOck.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -9,13 +11,14 @@ using System;
 using System.Windows.Media.Imaging;
 using SlideDOck.Utils;
 using System.Diagnostics;
-using SlideDOck.Commands;   
+using System.Linq;
 
 namespace SlideDOck.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
         private bool _isExpanded;
+        private readonly ConfigurationService _configService;
         public ICommand ToggleDockCommand { get; }
         public ICommand AddMenuGroupCommand { get; }
         public ICommand AddAppFromDialogCommand { get; }
@@ -25,13 +28,15 @@ namespace SlideDOck.ViewModels
 
         public MainViewModel()
         {
+            _configService = new ConfigurationService();
             ToggleDockCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             AddMenuGroupCommand = new RelayCommand(_ => AddNewMenuGroup());
             AddAppFromDialogCommand = new RelayCommand(_ => AddAppFromFileDialog());
             RemoveMenuGroupCommand = new RelayCommand(param => RemoveMenuGroup(param as MenuGroupViewModel));
             RemoveAppCommand = new RelayCommand(param => RemoveApp(param as AppIconViewModel));
             OpenAppFolderCommand = new RelayCommand(param => OpenAppFolder(param as AppIconViewModel));
-            InitializeSampleData();
+
+            LoadConfiguration();
         }
 
         public bool IsExpanded
@@ -51,6 +56,8 @@ namespace SlideDOck.ViewModels
             var newGroup = new MenuGroup { Name = "Novo Grupo", IsExpanded = true };
             var viewModel = new MenuGroupViewModel(newGroup, this);
             MenuGroups.Add(viewModel);
+            System.Diagnostics.Debug.WriteLine("Novo grupo adicionado");
+            SaveConfiguration(); // Salva imediatamente
         }
 
         public void RemoveMenuGroup(MenuGroupViewModel group)
@@ -58,6 +65,8 @@ namespace SlideDOck.ViewModels
             if (group != null && MenuGroups.Contains(group))
             {
                 MenuGroups.Remove(group);
+                System.Diagnostics.Debug.WriteLine("Grupo removido");
+                SaveConfiguration(); // Salva imediatamente
             }
         }
 
@@ -83,8 +92,6 @@ namespace SlideDOck.ViewModels
 
         private void AddAppToSelectedGroup(string filePath)
         {
-            // Para simplificar, adiciona ao primeiro grupo
-            // Na prática, você pode querer mostrar um diálogo para escolher o grupo
             if (MenuGroups.Count > 0)
             {
                 var appIcon = new AppIcon
@@ -94,6 +101,8 @@ namespace SlideDOck.ViewModels
                 };
 
                 MenuGroups[0].AddAppIcon(appIcon);
+                System.Diagnostics.Debug.WriteLine("App adicionado ao grupo");
+                SaveConfiguration(); // Salva imediatamente
             }
         }
 
@@ -101,12 +110,13 @@ namespace SlideDOck.ViewModels
         {
             if (appViewModel != null)
             {
-                // Procura em todos os grupos qual contém este app
                 foreach (var group in MenuGroups)
                 {
                     if (group.AppIcons.Contains(appViewModel))
                     {
                         group.RemoveApp(appViewModel);
+                        System.Diagnostics.Debug.WriteLine("App removido");
+                        SaveConfiguration(); // Salva imediatamente
                         break;
                     }
                 }
@@ -139,7 +149,6 @@ namespace SlideDOck.ViewModels
                 AddNewMenuGroup();
             }
 
-            // Adicionar ao primeiro grupo (ou implementar lógica para escolher grupo)
             if (MenuGroups.Count > 0)
             {
                 var appIcon = new AppIcon
@@ -149,6 +158,70 @@ namespace SlideDOck.ViewModels
                 };
 
                 MenuGroups[0].AddAppIcon(appIcon);
+                System.Diagnostics.Debug.WriteLine("App adicionado via arquivo");
+                SaveConfiguration(); // Salva imediatamente
+            }
+        }
+
+        private void LoadConfiguration()
+        {
+            try
+            {
+                var config = _configService.LoadConfiguration();
+
+                // Limpa os grupos existentes
+                MenuGroups.Clear();
+
+                // Carrega os grupos salvos
+                foreach (var groupData in config.MenuGroups)
+                {
+                    var group = new MenuGroup
+                    {
+                        Name = groupData.Name,
+                        IsExpanded = groupData.IsExpanded
+                    };
+
+                    var groupViewModel = new MenuGroupViewModel(group, this);
+
+                    // Carrega os apps do grupo
+                    foreach (var appData in groupData.AppIcons)
+                    {
+                        var appIcon = new AppIcon
+                        {
+                            Name = appData.Name,
+                            ExecutablePath = appData.ExecutablePath
+                        };
+
+                        groupViewModel.AddAppIcon(appIcon);
+                    }
+
+                    MenuGroups.Add(groupViewModel);
+                }
+
+                // Se não houver grupos, carrega os dados de exemplo
+                if (MenuGroups.Count == 0)
+                {
+                    InitializeSampleData();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro ao carregar configuração: {ex.Message}");
+                InitializeSampleData();
+            }
+        }
+
+        private void SaveConfiguration()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Salvando configuração...");
+                _configService.SaveMenuGroups(MenuGroups);
+                System.Diagnostics.Debug.WriteLine($"Configuração salva com {MenuGroups.Count} grupos");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro ao salvar configuração: {ex.Message}");
             }
         }
 
@@ -158,26 +231,14 @@ namespace SlideDOck.ViewModels
             var group1 = new MenuGroup { Name = "Desenvolvimento", IsExpanded = true };
             var group2 = new MenuGroup { Name = "Utilitários", IsExpanded = false };
 
-            var app1 = new AppIcon
-            {
-                Name = "Visual Studio",
-                ExecutablePath = @"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.exe"
-            };
-
-            var app2 = new AppIcon
-            {
-                Name = "Notepad++",
-                ExecutablePath = @"C:\Program Files\Notepad++\notepad++.exe"
-            };
-
             var group1ViewModel = new MenuGroupViewModel(group1, this);
             var group2ViewModel = new MenuGroupViewModel(group2, this);
 
-            group1ViewModel.AddAppIcon(app1);
-            group2ViewModel.AddAppIcon(app2);
-
             MenuGroups.Add(group1ViewModel);
             MenuGroups.Add(group2ViewModel);
+
+            // Salva os dados iniciais
+            SaveConfiguration();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

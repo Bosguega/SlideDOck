@@ -128,6 +128,14 @@
                                       Width="12" 
                                       Height="12"/>
                             </Button>
+                            <!-- Botão de sair -->
+                            <Button Style="{StaticResource IconButtonStyle}"
+                                    Click="CloseButton_Click"
+                                    ToolTip="Sair">
+                                <Path Data="M0,0 L10,10 M0,10 L10,0" 
+                                      Stroke="Red" 
+                                      StrokeThickness="2"/>
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </Border>
