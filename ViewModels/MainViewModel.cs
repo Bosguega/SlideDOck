@@ -56,7 +56,7 @@ namespace SlideDOck.ViewModels
             var newGroup = new MenuGroup { Name = "Novo Grupo", IsExpanded = true };
             var viewModel = new MenuGroupViewModel(newGroup, this);
             MenuGroups.Add(viewModel);
-            System.Diagnostics.Debug.WriteLine("Novo grupo adicionado");
+            Debug.WriteLine("Novo grupo adicionado");
             SaveConfiguration(); // Salva imediatamente
         }
 
@@ -65,7 +65,7 @@ namespace SlideDOck.ViewModels
             if (group != null && MenuGroups.Contains(group))
             {
                 MenuGroups.Remove(group);
-                System.Diagnostics.Debug.WriteLine("Grupo removido");
+                Debug.WriteLine("Grupo removido");
                 SaveConfiguration(); // Salva imediatamente
             }
         }
@@ -100,8 +100,9 @@ namespace SlideDOck.ViewModels
                     ExecutablePath = filePath
                 };
 
+                // Adiciona ao primeiro grupo usando o método AddAppIcon do ViewModel
                 MenuGroups[0].AddAppIcon(appIcon);
-                System.Diagnostics.Debug.WriteLine("App adicionado ao grupo");
+                Debug.WriteLine($"App adicionado ao grupo: {appIcon.Name}");
                 SaveConfiguration(); // Salva imediatamente
             }
         }
@@ -115,8 +116,8 @@ namespace SlideDOck.ViewModels
                     if (group.AppIcons.Contains(appViewModel))
                     {
                         group.RemoveApp(appViewModel);
-                        System.Diagnostics.Debug.WriteLine("App removido");
-                        SaveConfiguration(); // Salva imediatamente
+                        Debug.WriteLine("App removido");
+                        // SaveConfiguration já é chamado dentro de RemoveApp
                         break;
                     }
                 }
@@ -157,8 +158,9 @@ namespace SlideDOck.ViewModels
                     ExecutablePath = filePath
                 };
 
+                // Adiciona ao primeiro grupo usando o método AddAppIcon do ViewModel
                 MenuGroups[0].AddAppIcon(appIcon);
-                System.Diagnostics.Debug.WriteLine("App adicionado via arquivo");
+                Debug.WriteLine($"App adicionado via arquivo: {appIcon.Name}");
                 SaveConfiguration(); // Salva imediatamente
             }
         }
@@ -167,7 +169,9 @@ namespace SlideDOck.ViewModels
         {
             try
             {
+                Debug.WriteLine("Iniciando carregamento da configuração...");
                 var config = _configService.LoadConfiguration();
+                Debug.WriteLine($"Configuração carregada com {config.MenuGroups.Count} grupos");
 
                 // Limpa os grupos existentes
                 MenuGroups.Clear();
@@ -175,53 +179,62 @@ namespace SlideDOck.ViewModels
                 // Carrega os grupos salvos
                 foreach (var groupData in config.MenuGroups)
                 {
+                    Debug.WriteLine($"Carregando grupo: {groupData.Name} com {groupData.AppIcons.Count} aplicativos");
+
                     var group = new MenuGroup
                     {
                         Name = groupData.Name,
                         IsExpanded = groupData.IsExpanded
                     };
 
-                    var groupViewModel = new MenuGroupViewModel(group, this);
-
                     // Carrega os apps do grupo
                     foreach (var appData in groupData.AppIcons)
                     {
+                        Debug.WriteLine($"Carregando app: {appData.Name}, {appData.ExecutablePath}");
                         var appIcon = new AppIcon
                         {
                             Name = appData.Name,
                             ExecutablePath = appData.ExecutablePath
                         };
 
-                        groupViewModel.AddAppIcon(appIcon);
+                        // Adiciona diretamente ao modelo
+                        group.AppIcons.Add(appIcon);
                     }
 
+                    // Cria o ViewModel após o modelo estar completamente preenchido
+                    var groupViewModel = new MenuGroupViewModel(group, this);
                     MenuGroups.Add(groupViewModel);
+
+                    Debug.WriteLine($"Grupo '{groupData.Name}' adicionado com {groupViewModel.AppIcons.Count} aplicativos no ViewModel");
                 }
 
                 // Se não houver grupos, carrega os dados de exemplo
                 if (MenuGroups.Count == 0)
                 {
+                    Debug.WriteLine("Nenhum grupo encontrado, inicializando com dados de exemplo");
                     InitializeSampleData();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao carregar configuração: {ex.Message}");
+                Debug.WriteLine($"Erro ao carregar configuração: {ex.Message}");
+                Debug.WriteLine($"StackTrace: {ex.StackTrace}");
                 InitializeSampleData();
             }
         }
 
-        private void SaveConfiguration()
+        public void SaveConfiguration()
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("Salvando configuração...");
+                Debug.WriteLine("Salvando configuração...");
                 _configService.SaveMenuGroups(MenuGroups);
-                System.Diagnostics.Debug.WriteLine($"Configuração salva com {MenuGroups.Count} grupos");
+                Debug.WriteLine($"Configuração salva com {MenuGroups.Count} grupos");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao salvar configuração: {ex.Message}");
+                Debug.WriteLine($"Erro ao salvar configuração: {ex.Message}");
+                Debug.WriteLine($"StackTrace: {ex.StackTrace}");
             }
         }
 

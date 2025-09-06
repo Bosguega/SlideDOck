@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace SlideDOck.Services
 {
@@ -34,8 +35,27 @@ namespace SlideDOck.Services
                 if (File.Exists(_configPath))
                 {
                     string json = File.ReadAllText(_configPath);
-                    Debug.WriteLine("Configuração carregada com sucesso");
-                    return JsonConvert.DeserializeObject<DockConfiguration>(json) ?? new DockConfiguration();
+                    Debug.WriteLine($"Arquivo de configuração encontrado. Tamanho: {json.Length} caracteres");
+
+                    var config = JsonConvert.DeserializeObject<DockConfiguration>(json);
+                    if (config != null)
+                    {
+                        Debug.WriteLine($"Configuração carregada com sucesso. Grupos: {config.MenuGroups.Count}");
+                        foreach (var group in config.MenuGroups)
+                        {
+                            Debug.WriteLine($"Grupo '{group.Name}' com {group.AppIcons.Count} aplicativos");
+                            foreach (var app in group.AppIcons)
+                            {
+                                Debug.WriteLine($"  - App: {app.Name}, Caminho: {app.ExecutablePath}");
+                            }
+                        }
+                        return config;
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Falha ao desserializar a configuração. Retornando configuração vazia.");
+                        return new DockConfiguration();
+                    }
                 }
                 else
                 {
@@ -45,6 +65,7 @@ namespace SlideDOck.Services
             catch (Exception ex)
             {
                 Debug.WriteLine($"Erro ao carregar configuração: {ex.Message}");
+                Debug.WriteLine($"StackTrace: {ex.StackTrace}");
             }
 
             return new DockConfiguration();
@@ -83,6 +104,8 @@ namespace SlideDOck.Services
         {
             var config = new DockConfiguration();
 
+            Debug.WriteLine($"Iniciando salvamento de {menuGroups.Count()} grupos");
+
             foreach (var group in menuGroups)
             {
                 var groupData = new MenuGroupData
@@ -91,8 +114,11 @@ namespace SlideDOck.Services
                     IsExpanded = group.IsExpanded
                 };
 
+                Debug.WriteLine($"Salvando grupo '{group.Name}' com {group.AppIcons.Count} aplicativos");
+
                 foreach (var app in group.AppIcons)
                 {
+                    Debug.WriteLine($"Salvando app: {app.Name}, {app.ExecutablePath}");
                     groupData.AppIcons.Add(new AppIconData
                     {
                         Name = app.Name,

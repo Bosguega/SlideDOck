@@ -8,6 +8,12 @@ namespace SlideDOck.Models
         private string _name;
         private bool _isExpanded;
 
+        public MenuGroup()
+        {
+            // Inicializa a coleção para evitar referências nulas
+            AppIcons = new ObservableCollection<AppIcon>();
+        }
+
         public string Name
         {
             get => _name;
@@ -28,7 +34,7 @@ namespace SlideDOck.Models
             }
         }
 
-        public ObservableCollection<AppIcon> AppIcons { get; set; } = new ObservableCollection<AppIcon>();
+        public ObservableCollection<AppIcon> AppIcons { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
