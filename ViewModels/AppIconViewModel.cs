@@ -1,4 +1,5 @@
 ﻿using SlideDOck.Models;
+using SlideDOck.Commands;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -6,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using SlideDOck.Utils;
 using System;
+using System.Windows;
 
 namespace SlideDOck.ViewModels
 {
@@ -13,11 +15,18 @@ namespace SlideDOck.ViewModels
     {
         private readonly AppIcon _model;
         public ICommand LaunchAppCommand { get; }
+        public ICommand RemoveAppCommand { get; }
+        public ICommand OpenFolderCommand { get; }
+
+        public event EventHandler RemoveRequested;
+        public event EventHandler OpenFolderRequested;
 
         public AppIconViewModel(AppIcon model)
         {
             _model = model;
             LaunchAppCommand = new RelayCommand(_ => LaunchApp());
+            RemoveAppCommand = new RelayCommand(_ => OnRemoveRequested());
+            OpenFolderCommand = new RelayCommand(_ => OnOpenFolderRequested());
             LoadIcon();
         }
 
@@ -57,15 +66,12 @@ namespace SlideDOck.ViewModels
             {
                 if (!string.IsNullOrEmpty(ExecutablePath) && File.Exists(ExecutablePath))
                 {
-                    // Tenta extrair o ícone real
                     IconSource = IconExtractor.ExtractIconToBitmapSource(ExecutablePath);
                 }
-
-                // Se não conseguir, o XAML cuida do fallback
             }
             catch
             {
-                // Deixa o XAML cuidar do ícone padrão
+                // O XAML cuida do fallback
             }
         }
 
@@ -83,9 +89,19 @@ namespace SlideDOck.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show($"Erro ao abrir aplicativo: {ex.Message}");
+                    MessageBox.Show($"Erro ao abrir aplicativo: {ex.Message}");
                 }
             }
+        }
+
+        private void OnRemoveRequested()
+        {
+            RemoveRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnOpenFolderRequested()
+        {
+            OpenFolderRequested?.Invoke(this, EventArgs.Empty);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

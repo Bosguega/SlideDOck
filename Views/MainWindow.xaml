@@ -207,11 +207,9 @@
                                                             <Button.ContextMenu>
                                                                 <ContextMenu>
                                                                     <MenuItem Header="Remover App" 
-                                                                              Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.RemoveAppCommand}" 
-                                                                              CommandParameter="{Binding}"/>
+                                                                              Command="{Binding RemoveAppCommand}"/>
                                                                     <MenuItem Header="Abrir Pasta" 
-                                                                              Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OpenAppFolderCommand}" 
-                                                                              CommandParameter="{Binding}"/>
+                                                                              Command="{Binding OpenFolderCommand}"/>
                                                                 </ContextMenu>
                                                             </Button.ContextMenu>
                                                             <Image Source="{Binding IconSource}" 

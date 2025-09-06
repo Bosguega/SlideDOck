@@ -9,6 +9,7 @@ using System;
 using System.Windows.Media.Imaging;
 using SlideDOck.Utils;
 using System.Diagnostics;
+using SlideDOck.Commands;   
 
 namespace SlideDOck.ViewModels
 {

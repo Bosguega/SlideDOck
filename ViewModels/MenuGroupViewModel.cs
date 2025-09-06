@@ -1,10 +1,13 @@
-﻿using SlideDOck.Models;
+﻿using Microsoft.Win32;
+using SlideDOck.Commands;
+using SlideDOck.Models;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows.Input;
-using Microsoft.Win32;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Input;
 
 namespace SlideDOck.ViewModels
 {
@@ -49,7 +52,10 @@ namespace SlideDOck.ViewModels
 
         public void AddAppIcon(AppIcon appIcon)
         {
-            AppIcons.Add(new AppIconViewModel(appIcon));
+            var appIconViewModel = new AppIconViewModel(appIcon);
+            appIconViewModel.RemoveRequested += (sender, e) => RemoveApp(appIconViewModel);
+            appIconViewModel.OpenFolderRequested += (sender, e) => OpenAppFolder(appIconViewModel);
+            AppIcons.Add(appIconViewModel);
         }
 
         private void AddAppFromDialog()
@@ -77,6 +83,25 @@ namespace SlideDOck.ViewModels
             if (appViewModel != null && AppIcons.Contains(appViewModel))
             {
                 AppIcons.Remove(appViewModel);
+            }
+        }
+
+        private void OpenAppFolder(AppIconViewModel appViewModel)
+        {
+            if (appViewModel != null && !string.IsNullOrEmpty(appViewModel.ExecutablePath))
+            {
+                try
+                {
+                    string folderPath = Path.GetDirectoryName(appViewModel.ExecutablePath);
+                    if (Directory.Exists(folderPath))
+                    {
+                        Process.Start("explorer.exe", folderPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao abrir pasta: {ex.Message}");
+                }
             }
         }
 
