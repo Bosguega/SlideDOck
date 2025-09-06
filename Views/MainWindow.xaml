@@ -200,25 +200,47 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Grid>
-                                                            <Button Style="{StaticResource AppButtonStyle}"
-                                                                    Command="{Binding LaunchAppCommand}"
-                                                                    ToolTip="{Binding Name}"
-                                                                    MouseMove="AppIcon_MouseMove">
-                                                                <Image Source="{Binding IconPath}" 
-                                                                       Width="24" 
-                                                                       Height="24"/>
-                                                            </Button>
-                                                            <Button Style="{StaticResource RemoveButtonStyle}"
-                                                                    HorizontalAlignment="Right"
-                                                                    VerticalAlignment="Top"
-                                                                    Background="Red"
-                                                                    ToolTip="Remover App">
-                                                                <Path Data="M0,0 L8,8 M0,8 L8,0" 
-                                                                      Stroke="White" 
-                                                                      StrokeThickness="1"/>
-                                                            </Button>
-                                                        </Grid>
+                                                        <Button Style="{StaticResource AppButtonStyle}"
+                                                                Command="{Binding LaunchAppCommand}"
+                                                                ToolTip="{Binding Name}"
+                                                                MouseMove="AppIcon_MouseMove">
+                                                            <Button.ContextMenu>
+                                                                <ContextMenu>
+                                                                    <MenuItem Header="Remover App" 
+                                                                              Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.RemoveAppCommand}" 
+                                                                              CommandParameter="{Binding}"/>
+                                                                    <MenuItem Header="Abrir Pasta" 
+                                                                              Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OpenAppFolderCommand}" 
+                                                                              CommandParameter="{Binding}"/>
+                                                                </ContextMenu>
+                                                            </Button.ContextMenu>
+                                                            <Image Source="{Binding IconSource}" 
+                                                                   Width="24" 
+                                                                   Height="24">
+                                                                <Image.Style>
+                                                                    <Style TargetType="Image">
+                                                                        <Setter Property="Source" Value="{Binding IconSource}"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IconSource}" Value="{x:Null}">
+                                                                                <Setter Property="Source">
+                                                                                    <Setter.Value>
+                                                                                        <DrawingImage>
+                                                                                            <DrawingImage.Drawing>
+                                                                                                <GeometryDrawing Brush="LightBlue">
+                                                                                                    <GeometryDrawing.Geometry>
+                                                                                                        <RectangleGeometry Rect="0,0,24,24"/>
+                                                                                                    </GeometryDrawing.Geometry>
+                                                                                                </GeometryDrawing>
+                                                                                            </DrawingImage.Drawing>
+                                                                                        </DrawingImage>
+                                                                                    </Setter.Value>
+                                                                                </Setter>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Image.Style>
+                                                            </Image>
+                                                        </Button>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>

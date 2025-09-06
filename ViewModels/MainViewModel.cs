@@ -1,12 +1,14 @@
-﻿using Microsoft.Win32;
-using SlideDOck.Models;
-using System;
+﻿using SlideDOck.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Windows;
 using System.Windows.Input;
+using Microsoft.Win32;
+using System.IO;
+using System.Windows;
+using System;
+using System.Windows.Media.Imaging;
+using SlideDOck.Utils;
+using System.Diagnostics;
 
 namespace SlideDOck.ViewModels
 {
@@ -17,6 +19,8 @@ namespace SlideDOck.ViewModels
         public ICommand AddMenuGroupCommand { get; }
         public ICommand AddAppFromDialogCommand { get; }
         public ICommand RemoveMenuGroupCommand { get; }
+        public ICommand RemoveAppCommand { get; }
+        public ICommand OpenAppFolderCommand { get; }
 
         public MainViewModel()
         {
@@ -24,6 +28,8 @@ namespace SlideDOck.ViewModels
             AddMenuGroupCommand = new RelayCommand(_ => AddNewMenuGroup());
             AddAppFromDialogCommand = new RelayCommand(_ => AddAppFromFileDialog());
             RemoveMenuGroupCommand = new RelayCommand(param => RemoveMenuGroup(param as MenuGroupViewModel));
+            RemoveAppCommand = new RelayCommand(param => RemoveApp(param as AppIconViewModel));
+            OpenAppFolderCommand = new RelayCommand(param => OpenAppFolder(param as AppIconViewModel));
             InitializeSampleData();
         }
 
@@ -83,78 +89,46 @@ namespace SlideDOck.ViewModels
                 var appIcon = new AppIcon
                 {
                     Name = Path.GetFileNameWithoutExtension(filePath),
-                    ExecutablePath = filePath,
-                    IconPath = GetIconPathForFile(filePath)
+                    ExecutablePath = filePath
                 };
 
                 MenuGroups[0].AddAppIcon(appIcon);
             }
         }
 
-        private string GetIconPathForFile(string filePath)
+        private void RemoveApp(AppIconViewModel appViewModel)
         {
-            try
+            if (appViewModel != null)
             {
-                // Tenta extrair o ícone real do arquivo
-                string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SlideDOck", "Icons");
-                string iconPath = Utils.IconExtractor.ExtractIconToFile(filePath, appDataPath);
-
-                if (!string.IsNullOrEmpty(iconPath) && File.Exists(iconPath))
+                // Procura em todos os grupos qual contém este app
+                foreach (var group in MenuGroups)
                 {
-                    return iconPath;
+                    if (group.AppIcons.Contains(appViewModel))
+                    {
+                        group.RemoveApp(appViewModel);
+                        break;
+                    }
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro ao extrair ícone: {ex.Message}");
-            }
-
-            // Retorna ícone padrão se falhar
-            return "pack://application:,,,/Resources/default_app.png";
         }
 
-        private string ExtractIconFromFile(string filePath)
+        private void OpenAppFolder(AppIconViewModel appViewModel)
         {
-            try
+            if (appViewModel != null && !string.IsNullOrEmpty(appViewModel.ExecutablePath))
             {
-                string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SlideDOck", "Icons");
-                return Utils.IconExtractor.ExtractIconToFile(filePath, appDataPath);
+                try
+                {
+                    string folderPath = Path.GetDirectoryName(appViewModel.ExecutablePath);
+                    if (Directory.Exists(folderPath))
+                    {
+                        Process.Start("explorer.exe", folderPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao abrir pasta: {ex.Message}");
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro ao extrair ícone: {ex.Message}");
-                return "pack://application:,,,/Resources/default_app.png";
-            }
-        }
-
-        private void InitializeSampleData()
-        {
-            // Exemplo de dados iniciais
-            var group1 = new MenuGroup { Name = "Desenvolvimento", IsExpanded = true };
-            var group2 = new MenuGroup { Name = "Utilitários", IsExpanded = false };
-
-            var app1 = new AppIcon
-            {
-                Name = "Visual Studio",
-                IconPath = "pack://application:,,,/Resources/vs_icon.png",
-                ExecutablePath = @"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.exe"
-            };
-
-            var app2 = new AppIcon
-            {
-                Name = "Notepad++",
-                IconPath = "pack://application:,,,/Resources/notepad_icon.png",
-                ExecutablePath = @"C:\Program Files\Notepad++\notepad++.exe"
-            };
-
-            var group1ViewModel = new MenuGroupViewModel(group1, this);
-            var group2ViewModel = new MenuGroupViewModel(group2, this);
-
-            group1ViewModel.AddAppIcon(app1);
-            group2ViewModel.AddAppIcon(app2);
-
-            MenuGroups.Add(group1ViewModel);
-            MenuGroups.Add(group2ViewModel);
         }
 
         public void AddAppFromFile(string filePath)
@@ -170,12 +144,39 @@ namespace SlideDOck.ViewModels
                 var appIcon = new AppIcon
                 {
                     Name = Path.GetFileNameWithoutExtension(filePath),
-                    ExecutablePath = filePath,
-                    IconPath = GetIconPathForFile(filePath)
+                    ExecutablePath = filePath
                 };
 
                 MenuGroups[0].AddAppIcon(appIcon);
             }
+        }
+
+        private void InitializeSampleData()
+        {
+            // Exemplo de dados iniciais
+            var group1 = new MenuGroup { Name = "Desenvolvimento", IsExpanded = true };
+            var group2 = new MenuGroup { Name = "Utilitários", IsExpanded = false };
+
+            var app1 = new AppIcon
+            {
+                Name = "Visual Studio",
+                ExecutablePath = @"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.exe"
+            };
+
+            var app2 = new AppIcon
+            {
+                Name = "Notepad++",
+                ExecutablePath = @"C:\Program Files\Notepad++\notepad++.exe"
+            };
+
+            var group1ViewModel = new MenuGroupViewModel(group1, this);
+            var group2ViewModel = new MenuGroupViewModel(group2, this);
+
+            group1ViewModel.AddAppIcon(app1);
+            group2ViewModel.AddAppIcon(app2);
+
+            MenuGroups.Add(group1ViewModel);
+            MenuGroups.Add(group2ViewModel);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

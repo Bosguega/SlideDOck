@@ -65,45 +65,10 @@ namespace SlideDOck.ViewModels
                 var appIcon = new AppIcon
                 {
                     Name = Path.GetFileNameWithoutExtension(openFileDialog.FileName),
-                    ExecutablePath = openFileDialog.FileName,
-                    IconPath = GetIconPathForFile(openFileDialog.FileName)
+                    ExecutablePath = openFileDialog.FileName
                 };
 
                 AddAppIcon(appIcon);
-            }
-        }
-
-        private string GetIconPathForFile(string filePath)
-        {
-            try
-            {
-                // Extrair ícone do executável
-                string iconPath = ExtractIconFromFile(filePath);
-                if (!string.IsNullOrEmpty(iconPath) && File.Exists(iconPath))
-                {
-                    return iconPath;
-                }
-            }
-            catch
-            {
-                // Se falhar, retorna ícone padrão
-            }
-
-            // Retorna ícone padrão
-            return "pack://application:,,,/Resources/default_app.png";
-        }
-
-        private string ExtractIconFromFile(string filePath)
-        {
-            try
-            {
-                // Aqui você pode implementar a extração real do ícone
-                // Por enquanto, retorna um caminho padrão
-                return "pack://application:,,,/Resources/default_app.png";
-            }
-            catch
-            {
-                return "pack://application:,,,/Resources/default_app.png";
             }
         }
 

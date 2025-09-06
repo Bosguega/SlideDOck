@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel;
+using System.Windows.Media.Imaging;
 
 namespace SlideDOck.Models
 {
     public class AppIcon : INotifyPropertyChanged
     {
         private string _name;
-        private string _iconPath;
         private string _executablePath;
+        private BitmapSource _iconSource;
 
         public string Name
         {
@@ -18,12 +19,12 @@ namespace SlideDOck.Models
             }
         }
 
-        public string IconPath
+        public BitmapSource IconSource
         {
-            get => _iconPath;
+            get => _iconSource;
             set
             {
-                _iconPath = value;
+                _iconSource = value;
                 OnPropertyChanged();
             }
         }

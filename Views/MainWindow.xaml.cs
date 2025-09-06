@@ -74,30 +74,10 @@ namespace SlideDOck.Views
         private void AddAppFromFile(string filePath)
         {
             var viewModel = (ViewModels.MainViewModel)DataContext;
-            if (viewModel.MenuGroups.Count == 0)
+            if (viewModel != null)
             {
-                viewModel.AddMenuGroupCommand.Execute(null);
+                viewModel.AddAppFromFile(filePath);
             }
-
-            // Adicionar ao primeiro grupo (ou implementar lógica para escolher grupo)
-            if (viewModel.MenuGroups.Count > 0)
-            {
-                var appIcon = new Models.AppIcon
-                {
-                    Name = Path.GetFileNameWithoutExtension(filePath),
-                    ExecutablePath = filePath,
-                    IconPath = GetIconFromFile(filePath)
-                };
-
-                viewModel.MenuGroups[0].AddAppIcon(appIcon);
-            }
-        }
-
-        private string GetIconFromFile(string filePath)
-        {
-            // Implementar extração de ícone real
-            // Por enquanto retorna ícone padrão
-            return "pack://application:,,,/Resources/default_app.png";
         }
     }
 }

@@ -9,33 +9,6 @@ namespace SlideDOck.Utils
 {
     public static class IconExtractor
     {
-        public static string ExtractIconToFile(string filePath, string outputPath)
-        {
-            try
-            {
-                Icon icon = Icon.ExtractAssociatedIcon(filePath);
-                if (icon != null)
-                {
-                    using (Bitmap bitmap = icon.ToBitmap())
-                    {
-                        // Garante que o diretório de saída exista
-                        Directory.CreateDirectory(outputPath);
-
-                        string iconPath = Path.Combine(outputPath, $"{Path.GetFileNameWithoutExtension(filePath)}.png");
-                        bitmap.Save(iconPath, System.Drawing.Imaging.ImageFormat.Png);
-                        return iconPath;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log error
-                Console.WriteLine($"Erro ao extrair ícone: {ex.Message}");
-            }
-
-            return "pack://application:,,,/Resources/default_app.png";
-        }
-
         public static BitmapSource ExtractIconToBitmapSource(string filePath)
         {
             try
@@ -49,6 +22,31 @@ namespace SlideDOck.Utils
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao extrair ícone para BitmapSource: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        public static string ExtractIconToFile(string filePath, string outputPath)
+        {
+            try
+            {
+                Icon icon = Icon.ExtractAssociatedIcon(filePath);
+                if (icon != null)
+                {
+                    using (Bitmap bitmap = icon.ToBitmap())
+                    {
+                        Directory.CreateDirectory(outputPath);
+
+                        string iconPath = Path.Combine(outputPath, $"{Path.GetFileNameWithoutExtension(filePath)}.png");
+                        bitmap.Save(iconPath, System.Drawing.Imaging.ImageFormat.Png);
+                        return iconPath;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao extrair ícone: {ex.Message}");
             }
 
             return null;
