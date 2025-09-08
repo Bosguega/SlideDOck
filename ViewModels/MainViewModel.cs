@@ -25,6 +25,9 @@ namespace SlideDOck.ViewModels
         public ICommand RemoveMenuGroupCommand { get; }
         public ICommand RemoveAppCommand { get; }
         public ICommand OpenAppFolderCommand { get; }
+        // --- Added for refactoring ---
+        public ICommand CloseApplicationCommand { get; }
+        // -----------------------------
 
         public MainViewModel()
         {
@@ -35,7 +38,9 @@ namespace SlideDOck.ViewModels
             RemoveMenuGroupCommand = new RelayCommand(param => RemoveMenuGroup(param as MenuGroupViewModel));
             RemoveAppCommand = new RelayCommand(param => RemoveApp(param as AppIconViewModel));
             OpenAppFolderCommand = new RelayCommand(param => OpenAppFolder(param as AppIconViewModel));
-
+            // --- Added for refactoring ---
+            CloseApplicationCommand = new RelayCommand(_ => CloseApplication());
+            // -----------------------------
             LoadConfiguration();
         }
 
@@ -77,13 +82,11 @@ namespace SlideDOck.ViewModels
                 MessageBox.Show("Adicione um grupo primeiro!", "SlideDOck", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-
             var openFileDialog = new OpenFileDialog
             {
                 Filter = "Executáveis (*.exe)|*.exe|Todos os arquivos (*.*)|*.*",
                 Title = "Selecione um aplicativo"
             };
-
             if (openFileDialog.ShowDialog() == true)
             {
                 AddAppToSelectedGroup(openFileDialog.FileName);
@@ -99,7 +102,6 @@ namespace SlideDOck.ViewModels
                     Name = Path.GetFileNameWithoutExtension(filePath),
                     ExecutablePath = filePath
                 };
-
                 // Adiciona ao primeiro grupo usando o método AddAppIcon do ViewModel
                 MenuGroups[0].AddAppIcon(appIcon);
                 Debug.WriteLine($"App adicionado ao grupo: {appIcon.Name}");
@@ -149,7 +151,6 @@ namespace SlideDOck.ViewModels
             {
                 AddNewMenuGroup();
             }
-
             if (MenuGroups.Count > 0)
             {
                 var appIcon = new AppIcon
@@ -157,7 +158,6 @@ namespace SlideDOck.ViewModels
                     Name = Path.GetFileNameWithoutExtension(filePath),
                     ExecutablePath = filePath
                 };
-
                 // Adiciona ao primeiro grupo usando o método AddAppIcon do ViewModel
                 MenuGroups[0].AddAppIcon(appIcon);
                 Debug.WriteLine($"App adicionado via arquivo: {appIcon.Name}");
@@ -172,21 +172,17 @@ namespace SlideDOck.ViewModels
                 Debug.WriteLine("Iniciando carregamento da configuração...");
                 var config = _configService.LoadConfiguration();
                 Debug.WriteLine($"Configuração carregada com {config.MenuGroups.Count} grupos");
-
                 // Limpa os grupos existentes
                 MenuGroups.Clear();
-
                 // Carrega os grupos salvos
                 foreach (var groupData in config.MenuGroups)
                 {
                     Debug.WriteLine($"Carregando grupo: {groupData.Name} com {groupData.AppIcons.Count} aplicativos");
-
                     var group = new MenuGroup
                     {
                         Name = groupData.Name,
                         IsExpanded = groupData.IsExpanded
                     };
-
                     // Carrega os apps do grupo
                     foreach (var appData in groupData.AppIcons)
                     {
@@ -196,18 +192,14 @@ namespace SlideDOck.ViewModels
                             Name = appData.Name,
                             ExecutablePath = appData.ExecutablePath
                         };
-
                         // Adiciona diretamente ao modelo
                         group.AppIcons.Add(appIcon);
                     }
-
                     // Cria o ViewModel após o modelo estar completamente preenchido
                     var groupViewModel = new MenuGroupViewModel(group, this);
                     MenuGroups.Add(groupViewModel);
-
                     Debug.WriteLine($"Grupo '{groupData.Name}' adicionado com {groupViewModel.AppIcons.Count} aplicativos no ViewModel");
                 }
-
                 // Se não houver grupos, carrega os dados de exemplo
                 if (MenuGroups.Count == 0)
                 {
@@ -243,16 +235,21 @@ namespace SlideDOck.ViewModels
             // Exemplo de dados iniciais
             var group1 = new MenuGroup { Name = "Desenvolvimento", IsExpanded = true };
             var group2 = new MenuGroup { Name = "Utilitários", IsExpanded = false };
-
             var group1ViewModel = new MenuGroupViewModel(group1, this);
             var group2ViewModel = new MenuGroupViewModel(group2, this);
-
             MenuGroups.Add(group1ViewModel);
             MenuGroups.Add(group2ViewModel);
-
             // Salva os dados iniciais
             SaveConfiguration();
         }
+
+        // --- Added for refactoring ---
+        private void CloseApplication()
+        {
+            // Get the current application instance and shut it down
+            Application.Current.Shutdown();
+        }
+        // -----------------------------
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)

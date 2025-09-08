@@ -1,0 +1,63 @@
+<UserControl x:Class="SlideDOck.Views.MenuGroupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewmodels="clr-namespace:SlideDOck.ViewModels"
+             xmlns:local="clr-namespace:SlideDOck.Views"
+             mc:Ignorable="d"
+             d:DesignHeight="200" d:DesignWidth="240"
+             DataContext="{Binding}">
+	<Border Margin="2" Background="#22FFFFFF" CornerRadius="4">
+		<Expander IsExpanded="{Binding IsExpanded}"
+                  Background="Transparent"
+                  BorderBrush="Transparent">
+			<Expander.Header>
+				<Grid>
+					<TextBox Text="{Binding Name, Mode=TwoWay}"
+                             Background="Transparent"
+                             BorderBrush="Transparent"
+                             Foreground="White"
+                             FontWeight="Bold"
+                             HorizontalAlignment="Left"
+                             Width="180"/>
+					<Button Style="{StaticResource RemoveButtonStyle}"
+                            Command="{Binding RemoveGroupCommand}"
+                            HorizontalAlignment="Right"
+                            ToolTip="Remover Grupo">
+						<Path Data="M0,0 L10,10 M0,10 L10,0"
+                              Stroke="Red"
+                              StrokeThickness="2"/>
+					</Button>
+				</Grid>
+			</Expander.Header>
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
+				<Button Grid.Row="0"
+                        Style="{StaticResource IconButtonStyle}"
+                        Command="{Binding AddAppCommand}"
+                        HorizontalAlignment="Left"
+                        Margin="5,0,0,5"
+                        ToolTip="Adicionar App a este grupo">
+					<Path Data="M12,6 L12,18 M6,12 L18,12"
+                          Stroke="LightBlue"
+                          StrokeThickness="2"/>
+				</Button>
+				<ItemsControl Grid.Row="1"
+                              ItemsSource="{Binding AppIcons}"
+                              AllowDrop="True"
+                              Drop="AppIcons_Drop"
+                              DragEnter="AppIcons_DragEnter">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<WrapPanel/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+				</ItemsControl>
+			</Grid>
+		</Expander>
+	</Border>
+</UserControl>

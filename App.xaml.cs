@@ -10,7 +10,6 @@ namespace SlideDOck
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-
             // Verifica e cria pasta de recursos se necessário
             EnsureResourcesDirectory();
         }
