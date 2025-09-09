@@ -13,18 +13,18 @@ namespace SlideDOck.ViewModels
     {
         private bool _isExpanded;
         private readonly ConfigurationService _configService;
+        private readonly IFileInteractionService _fileInteractionService;
 
-        // Propriedade para o novo gerenciador
         public DockManagerViewModel DockManager { get; }
 
-        // Comandos que permanecem no MainViewModel
         public ICommand ToggleDockCommand { get; }
         public ICommand CloseApplicationCommand { get; }
 
         public MainViewModel()
         {
             _configService = new ConfigurationService();
-            DockManager = new DockManagerViewModel(this); // Inicializa o DockManager
+            _fileInteractionService = new FileInteractionService();
+            DockManager = new DockManagerViewModel(this, _fileInteractionService);
 
             ToggleDockCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             CloseApplicationCommand = new RelayCommand(_ => CloseApplication());

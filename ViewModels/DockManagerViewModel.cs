@@ -1,30 +1,34 @@
 ﻿using SlideDOck.Models;
 using SlideDOck.Commands;
+using SlideDOck.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
-using Microsoft.Win32;
-using System.IO;
 using System.Windows;
 using System.Diagnostics;
+using System.IO;
 
 namespace SlideDOck.ViewModels
 {
     public class DockManagerViewModel : INotifyPropertyChanged
     {
         private readonly MainViewModel _mainViewModel;
+        private readonly IFileInteractionService _fileInteractionService;
+
         public ObservableCollection<MenuGroupViewModel> MenuGroups { get; } = new();
 
         public ICommand AddMenuGroupCommand { get; }
         public ICommand RemoveMenuGroupCommand { get; }
         public ICommand AddAppFromDialogCommand { get; }
 
-        public DockManagerViewModel(MainViewModel mainViewModel)
+        public DockManagerViewModel(MainViewModel mainViewModel, IFileInteractionService fileInteractionService)
         {
             _mainViewModel = mainViewModel;
+            _fileInteractionService = fileInteractionService;
+
             AddMenuGroupCommand = new RelayCommand(_ => AddNewMenuGroup());
             RemoveMenuGroupCommand = new RelayCommand(param => RemoveMenuGroup(param as MenuGroupViewModel));
-            AddAppFromDialogCommand = new RelayCommand(_ => AddAppFromFileDialog());
+            AddAppFromDialogCommand = new RelayCommand(_ => AddAppFromDialog());
         }
 
         private void AddNewMenuGroup()
@@ -46,7 +50,7 @@ namespace SlideDOck.ViewModels
             }
         }
 
-        private void AddAppFromFileDialog()
+        private void AddAppFromDialog()
         {
             if (MenuGroups.Count == 0)
             {
@@ -54,15 +58,10 @@ namespace SlideDOck.ViewModels
                 return;
             }
 
-            var openFileDialog = new OpenFileDialog
+            string filePath = _fileInteractionService.SelectExecutableFile();
+            if (!string.IsNullOrEmpty(filePath))
             {
-                Filter = "Executáveis (*.exe)|*.exe|Todos os arquivos (*.*)|*.*",
-                Title = "Selecione um aplicativo"
-            };
-
-            if (openFileDialog.ShowDialog() == true)
-            {
-                AddAppToSelectedGroup(openFileDialog.FileName);
+                AddAppToSelectedGroup(filePath);
             }
         }
 
