@@ -33,14 +33,14 @@
                                FontWeight="Bold"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Style="{StaticResource IconButtonStyle}"
-                                Command="{Binding AddMenuGroupCommand}"
+                                Command="{Binding DockManager.AddMenuGroupCommand}"
                                 ToolTip="Adicionar Grupo">
                             <Path Data="M12,6 L12,18 M6,12 L18,12"
                                   Stroke="White"
                                   StrokeThickness="2"/>
                         </Button>
                         <Button Style="{StaticResource IconButtonStyle}"
-                                Command="{Binding AddAppFromDialogCommand}"
+                                Command="{Binding DockManager.AddAppFromDialogCommand}"
                                 ToolTip="Adicionar App">
                             <Path Data="M12,6 L12,18 M6,12 L18,12"
                                   Stroke="White"
@@ -73,7 +73,7 @@
                            FontSize="12"/>
             </Border>
             <ScrollViewer Grid.Row="2">
-                <ItemsControl ItemsSource="{Binding MenuGroups}">
+                <ItemsControl ItemsSource="{Binding DockManager.MenuGroups}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <local:MenuGroupView />

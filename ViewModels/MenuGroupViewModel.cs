@@ -26,7 +26,7 @@ namespace SlideDOck.ViewModels
             _mainViewModel = mainViewModel;
             ToggleExpandCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             AddAppCommand = new RelayCommand(_ => AddAppFromDialog());
-            RemoveGroupCommand = new RelayCommand(_ => _mainViewModel.RemoveMenuGroup(this));
+            RemoveGroupCommand = new RelayCommand(_ => _mainViewModel.DockManager.RemoveMenuGroup(this));
 
             // Sincronizar os AppIcons existentes no modelo
             SyncAppIconsFromModel();

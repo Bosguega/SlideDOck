@@ -67,10 +67,9 @@ namespace SlideDOck.Views
         {
             if (this.DataContext is ViewModels.MainViewModel mainViewModel)
             {
-                mainViewModel.AddAppFromFile(filePath);
+                mainViewModel.DockManager.AddAppFromFile(filePath);
             }
         }
-
         private static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
         {
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);
