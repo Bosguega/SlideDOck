@@ -13,7 +13,7 @@
         <!-- Rotaciona o texto para vertical -->
         <RotateTransform x:Key="RotateTextTransform" Angle="270"/>
 
-        <!-- Estilo do botão com hover de aumento e sombra leve -->
+        <!-- Estilo do botão com hover e sombra leve -->
         <Style x:Key="DockButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -94,35 +94,66 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
-                    <!-- Menu superior com botões -->
+                    <!-- Menu superior -->
                     <RowDefinition Height="*"/>
                     <!-- Conteúdo da barra -->
                 </Grid.RowDefinitions>
 
-                <!-- Menu superior com botões -->
+                <!-- Menu superior com 3 botões -->
                 <Border Grid.Row="0" Background="#FF3E3E42" Grid.ColumnSpan="2">
                     <Grid>
+                        <!-- Título -->
                         <TextBlock Text="SlideDOck"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Left"
-                                   Margin="10,0,0,0"
-                                   Foreground="White"
-                                   FontWeight="Bold"/>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center">
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Left"
+                   Margin="10,0,0,0"
+                   Foreground="White"
+                   FontWeight="Bold"
+                   FontSize="14"/>
+
+                        <!-- Botões -->
+                        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Margin="0,0,10,0">
+
+
+                            <!-- Adicionar Grupo -->
                             <Button Style="{StaticResource IconButtonStyle}"
-                                    Command="{Binding DockManager.AddMenuGroupCommand}"
-                                    ToolTip="Adicionar Grupo">
-                                <Path Data="M12,6 L12,18 M6,12 L18,12"
-                                      Stroke="White"
-                                      StrokeThickness="2"/>
+                    Command="{Binding DockManager.AddMenuGroupCommand}"
+                    ToolTip="Adicionar Grupo">
+                                <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
+                           Text="&#xf067;" 
+                           FontSize="16"
+                           Foreground="White"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
                             </Button>
+
+                            <!-- Mover Barra para Outro Lado -->
                             <Button Style="{StaticResource IconButtonStyle}"
-                                    Command="{Binding CloseApplicationCommand}"
-                                    ToolTip="Sair">
-                                <Path Data="M0,0 L10,10 M0,10 L10,0"
-                                      Stroke="Red"
-                                      StrokeThickness="2"/>
+                    Command="{Binding DockManager.ToggleDockSideCommand}"
+                    ToolTip="Mover Barra">
+                                <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
+                           Text="&#xf0ec;" 
+                           FontSize="16"
+                           Foreground="White"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
                             </Button>
+
+                            <!-- Sair / Fechar Aplicativo -->
+                            <Button Style="{StaticResource IconButtonStyle}"
+                    Command="{Binding CloseApplicationCommand}"
+                    ToolTip="Sair">
+                                <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
+                           Text="&#xf08b;"  
+                           FontSize="16"
+                           Foreground="Red"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                            </Button>
+
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -130,14 +161,15 @@
                 <!-- Conteúdo da barra (scroll) -->
                 <ScrollViewer Grid.Row="1"
                               VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled" Grid.ColumnSpan="2">
+                              HorizontalScrollBarVisibility="Disabled"
+                              Grid.ColumnSpan="2">
                     <ScrollViewer.Resources>
                         <Style TargetType="ScrollBar" BasedOn="{StaticResource TransparentScrollBar}"/>
                     </ScrollViewer.Resources>
                     <ItemsControl ItemsSource="{Binding DockManager.MenuGroups}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <local:MenuGroupView />
+                                <local:MenuGroupView/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -148,7 +180,7 @@
         <!-- Alça vertical à direita da barra -->
         <Border Grid.ZIndex="10"
                 Background="#CC2D2D30"
-            Width="30"
+                Width="30"
                 HorizontalAlignment="Left"
                 Margin="250,0,0,0"
                 CornerRadius="0,8,8,0"

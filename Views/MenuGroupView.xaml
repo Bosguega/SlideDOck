@@ -8,56 +8,80 @@
              mc:Ignorable="d"
              d:DesignHeight="200" d:DesignWidth="240"
              DataContext="{Binding}">
-	<Border Margin="2" Background="#22FFFFFF" CornerRadius="4">
-		<Expander IsExpanded="{Binding IsExpanded}"
+    <Border Margin="2" Background="#22FFFFFF" CornerRadius="4">
+        <Expander IsExpanded="{Binding IsExpanded}"
                   Background="Transparent"
                   BorderBrush="Transparent">
-			<Expander.Header>
-				<Grid>
-					<TextBox Text="{Binding Name, Mode=TwoWay}"
-                             Background="Transparent"
-                             BorderBrush="Transparent"
-                             Foreground="White"
-                             FontWeight="Bold"
-                             HorizontalAlignment="Left"
-                             Width="180"/>
-					<Button Style="{StaticResource RemoveButtonStyle}"
-                            Command="{Binding RemoveGroupCommand}"
-                            HorizontalAlignment="Right"
-                            ToolTip="Remover Grupo">
-						<Path Data="M0,0 L10,10 M0,10 L10,0"
-                              Stroke="Red"
-                              StrokeThickness="2"/>
-					</Button>
-				</Grid>
-			</Expander.Header>
-			<Grid>
-				<Grid.RowDefinitions>
-					<RowDefinition Height="Auto"/>
-					<RowDefinition Height="*"/>
-				</Grid.RowDefinitions>
-				<Button Grid.Row="0"
-                        Style="{StaticResource IconButtonStyle}"
-                        Command="{Binding AddAppCommand}"
-                        HorizontalAlignment="Left"
-                        Margin="5,0,0,5"
-                        ToolTip="Adicionar App a este grupo">
-					<Path Data="M12,6 L12,18 M6,12 L18,12"
-                          Stroke="LightBlue"
-                          StrokeThickness="2"/>
-				</Button>
-				<ItemsControl Grid.Row="1"
+            <Expander.Header>
+                <Grid Width="211">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Nome do grupo -->
+                    <TextBox Grid.Column="0"
+                 Text="{Binding Name, Mode=TwoWay}"
+                 Background="Transparent"
+                 BorderBrush="Transparent"
+                 Foreground="White"
+                 FontWeight="Bold"
+                 HorizontalAlignment="Stretch"
+                 Margin="0,0,5,0"/>
+
+                    <!-- Botões lado a lado -->
+                    <StackPanel Grid.Column="1"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"            
+                    Margin="0,0,5,0">
+
+                        <!-- Botão Adicionar App (usei outro ícone Free: fa-plus-circle) -->
+                        <Button Style="{StaticResource IconButtonStyle}"
+                    Command="{Binding AddAppCommand}"
+                    ToolTip="Adicionar App a este grupo">
+                            <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
+                    Text="&#xf0fe;"
+                    Foreground="LightBlue"
+                    FontSize="14"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"/>
+                        </Button>
+
+                        <!-- Botão Remover Grupo -->
+                        <Button Style="{StaticResource RemoveButtonStyle}"
+                    Command="{Binding RemoveGroupCommand}"
+                    ToolTip="Remover Grupo">
+                            <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
+                    Text="&#xf1f8;"
+                    Foreground="OrangeRed"
+                    FontSize="14"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Expander.Header>
+
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <ItemsControl Grid.Row="1"
                               ItemsSource="{Binding AppIcons}"
                               AllowDrop="True"
                               Drop="AppIcons_Drop"
                               DragEnter="AppIcons_DragEnter">
-					<ItemsControl.ItemsPanel>
-						<ItemsPanelTemplate>
-							<WrapPanel/>
-						</ItemsPanelTemplate>
-					</ItemsControl.ItemsPanel>
-				</ItemsControl>
-			</Grid>
-		</Expander>
-	</Border>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </Grid>
+        </Expander>
+    </Border>
 </UserControl>
