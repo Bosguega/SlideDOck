@@ -12,17 +12,17 @@ namespace SlideDOck.Services
     public class ConfigurationService
     {
         private readonly string _configPath;
+        private readonly ISampleDataProvider _sampleDataProvider;
 
-        public ConfigurationService()
+        public ConfigurationService(ISampleDataProvider sampleDataProvider)
         {
+            _sampleDataProvider = sampleDataProvider;
             string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SlideDOck");
-            // Garante que o diretório exista
             if (!Directory.Exists(appDataPath))
             {
                 Directory.CreateDirectory(appDataPath);
             }
             _configPath = Path.Combine(appDataPath, "configuration.json");
-
             Debug.WriteLine($"Config path: {_configPath}");
         }
 
@@ -41,25 +41,17 @@ namespace SlideDOck.Services
                     if (config != null)
                     {
                         Debug.WriteLine($"Configuração carregada com sucesso. Grupos: {config.MenuGroups.Count}");
-                        foreach (var group in config.MenuGroups)
-                        {
-                            Debug.WriteLine($"Grupo '{group.Name}' com {group.AppIcons.Count} aplicativos");
-                            foreach (var app in group.AppIcons)
-                            {
-                                Debug.WriteLine($"  - App: {app.Name}, Caminho: {app.ExecutablePath}");
-                            }
-                        }
                         return config;
                     }
                     else
                     {
-                        Debug.WriteLine("Falha ao desserializar a configuração. Retornando configuração vazia.");
-                        return new DockConfiguration();
+                        Debug.WriteLine("Falha ao desserializar a configuração. Retornando configuração de exemplo.");
+                        return _sampleDataProvider.GetSampleConfiguration();
                     }
                 }
                 else
                 {
-                    Debug.WriteLine("Arquivo de configuração não encontrado, usando padrão");
+                    Debug.WriteLine("Arquivo de configuração não encontrado, usando configuração de exemplo");
                 }
             }
             catch (Exception ex)
@@ -68,10 +60,10 @@ namespace SlideDOck.Services
                 Debug.WriteLine($"StackTrace: {ex.StackTrace}");
             }
 
-            return new DockConfiguration();
+            return _sampleDataProvider.GetSampleConfiguration();
         }
 
-        public void SaveConfiguration(DockConfiguration config)
+public void SaveConfiguration(DockConfiguration config)
         {
             try
             {

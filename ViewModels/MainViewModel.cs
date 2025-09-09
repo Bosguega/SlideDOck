@@ -22,7 +22,7 @@ namespace SlideDOck.ViewModels
 
         public MainViewModel()
         {
-            _configService = new ConfigurationService();
+            _configService = new ConfigurationService(new SampleDataProvider());
             _fileInteractionService = new FileInteractionService();
             DockManager = new DockManagerViewModel(this, _fileInteractionService);
 
@@ -90,30 +90,12 @@ namespace SlideDOck.ViewModels
                     DockManager.MenuGroups.Add(groupViewModel);
                     Debug.WriteLine($"Grupo '{groupData.Name}' adicionado com {groupViewModel.AppIcons.Count} aplicativos");
                 }
-
-                if (DockManager.MenuGroups.Count == 0)
-                {
-                    Debug.WriteLine("Nenhum grupo encontrado, inicializando com dados de exemplo");
-                    InitializeSampleData();
-                }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Erro ao carregar configuração: {ex.Message}");
                 Debug.WriteLine($"StackTrace: {ex.StackTrace}");
-                InitializeSampleData();
             }
-        }
-
-        private void InitializeSampleData()
-        {
-            var group1 = new MenuGroup { Name = "Desenvolvimento", IsExpanded = true };
-            var group2 = new MenuGroup { Name = "Utilitários", IsExpanded = false };
-            var group1ViewModel = new MenuGroupViewModel(group1, this);
-            var group2ViewModel = new MenuGroupViewModel(group2, this);
-            DockManager.MenuGroups.Add(group1ViewModel);
-            DockManager.MenuGroups.Add(group2ViewModel);
-            SaveConfiguration();
         }
 
         private void CloseApplication()
