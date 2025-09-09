@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using SlideDOck.Commands;
 using SlideDOck.Models;
+using SlideDOck.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -16,19 +17,24 @@ namespace SlideDOck.ViewModels
     {
         private readonly MenuGroup _model;
         private readonly MainViewModel _mainViewModel;
+        private readonly IDialogService _dialogService;
+
         public ICommand ToggleExpandCommand { get; }
         public ICommand AddAppCommand { get; }
         public ICommand RemoveGroupCommand { get; }
 
-        public MenuGroupViewModel(MenuGroup model, MainViewModel mainViewModel)
+        public MenuGroupViewModel(MenuGroup model,
+                                 MainViewModel mainViewModel,
+                                 IDialogService dialogService)
         {
             _model = model;
             _mainViewModel = mainViewModel;
+            _dialogService = dialogService;
+
             ToggleExpandCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             AddAppCommand = new RelayCommand(_ => AddAppFromDialog());
             RemoveGroupCommand = new RelayCommand(_ => _mainViewModel.DockManager.RemoveMenuGroup(this));
 
-            // Sincronizar os AppIcons existentes no modelo
             SyncAppIconsFromModel();
 
             Debug.WriteLine($"MenuGroupViewModel criado para grupo '{model.Name}' com {model.AppIcons.Count} aplicativos no modelo");
@@ -110,18 +116,24 @@ namespace SlideDOck.ViewModels
         {
             if (appViewModel != null && AppIcons.Contains(appViewModel))
             {
-                // Remove do ViewModel
-                AppIcons.Remove(appViewModel);
+                string message = $"Deseja remover o aplicativo '{appViewModel.Name}'?";
+                string title = "Confirmar Remoção";
 
-                // Encontra e remove do modelo
-                var modelToRemove = _model.AppIcons.FirstOrDefault(a => a.ExecutablePath == appViewModel.ExecutablePath);
-                if (modelToRemove != null)
+                if (_dialogService.ShowConfirmationDialog(message, title))
                 {
-                    _model.AppIcons.Remove(modelToRemove);
-                    Debug.WriteLine($"App removido do grupo: {appViewModel.Name}. Restantes no modelo: {_model.AppIcons.Count}");
-                }
+                    // Remove do ViewModel
+                    AppIcons.Remove(appViewModel);
 
-                _mainViewModel.SaveConfiguration();
+                    // Encontra e remove do modelo
+                    var modelToRemove = _model.AppIcons.FirstOrDefault(a => a.ExecutablePath == appViewModel.ExecutablePath);
+                    if (modelToRemove != null)
+                    {
+                        _model.AppIcons.Remove(modelToRemove);
+                        Debug.WriteLine($"App removido do grupo: {appViewModel.Name}. Restantes no modelo: {_model.AppIcons.Count}");
+                    }
+
+                    _mainViewModel.SaveConfiguration();
+                }
             }
         }
 

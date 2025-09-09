@@ -14,10 +14,10 @@ namespace SlideDOck.ViewModels
         private bool _isExpanded;
         private readonly ConfigurationService _configService;
         private readonly IFileInteractionService _fileInteractionService;
+        private readonly IDialogService _dialogService;
 
         public DockManagerViewModel DockManager { get; }
 
-        // Comandos que permanecem
         public ICommand ToggleDockCommand { get; }
         public ICommand CloseApplicationCommand { get; }
 
@@ -25,7 +25,9 @@ namespace SlideDOck.ViewModels
         {
             _configService = new ConfigurationService(new SampleDataProvider());
             _fileInteractionService = new FileInteractionService();
-            DockManager = new DockManagerViewModel(this, _fileInteractionService);
+            _dialogService = new DialogService();
+
+            DockManager = new DockManagerViewModel(this, _fileInteractionService, _dialogService);
 
             ToggleDockCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             CloseApplicationCommand = new RelayCommand(_ => CloseApplication());
@@ -87,7 +89,7 @@ namespace SlideDOck.ViewModels
                         group.AppIcons.Add(appIcon);
                     }
 
-                    var groupViewModel = new MenuGroupViewModel(group, this);
+                    var groupViewModel = new MenuGroupViewModel(group, this, _dialogService);
                     DockManager.MenuGroups.Add(groupViewModel);
                     Debug.WriteLine($"Grupo '{groupData.Name}' adicionado com {groupViewModel.AppIcons.Count} aplicativos");
                 }
@@ -98,7 +100,6 @@ namespace SlideDOck.ViewModels
                 Debug.WriteLine($"StackTrace: {ex.StackTrace}");
             }
         }
-
         private void CloseApplication()
         {
             Application.Current.Shutdown();

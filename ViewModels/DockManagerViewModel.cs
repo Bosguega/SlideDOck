@@ -14,6 +14,7 @@ namespace SlideDOck.ViewModels
     {
         private readonly MainViewModel _mainViewModel;
         private readonly IFileInteractionService _fileInteractionService;
+        private readonly IDialogService _dialogService;
 
         public ObservableCollection<MenuGroupViewModel> MenuGroups { get; } = new();
 
@@ -21,10 +22,13 @@ namespace SlideDOck.ViewModels
         public ICommand RemoveMenuGroupCommand { get; }
         public ICommand AddAppFromDialogCommand { get; }
 
-        public DockManagerViewModel(MainViewModel mainViewModel, IFileInteractionService fileInteractionService)
+        public DockManagerViewModel(MainViewModel mainViewModel,
+                                   IFileInteractionService fileInteractionService,
+                                   IDialogService dialogService)
         {
             _mainViewModel = mainViewModel;
             _fileInteractionService = fileInteractionService;
+            _dialogService = dialogService;
 
             AddMenuGroupCommand = new RelayCommand(_ => AddNewMenuGroup());
             RemoveMenuGroupCommand = new RelayCommand(param => RemoveMenuGroup(param as MenuGroupViewModel));
@@ -34,22 +38,26 @@ namespace SlideDOck.ViewModels
         private void AddNewMenuGroup()
         {
             var newGroup = new MenuGroup { Name = "Novo Grupo", IsExpanded = true };
-            var viewModel = new MenuGroupViewModel(newGroup, _mainViewModel);
+            var viewModel = new MenuGroupViewModel(newGroup, _mainViewModel, _dialogService);
             MenuGroups.Add(viewModel);
             Debug.WriteLine("Novo grupo adicionado");
             _mainViewModel.SaveConfiguration();
         }
-
         public void RemoveMenuGroup(MenuGroupViewModel group)
         {
             if (group != null && MenuGroups.Contains(group))
             {
-                MenuGroups.Remove(group);
-                Debug.WriteLine("Grupo removido");
-                _mainViewModel.SaveConfiguration();
+                string message = $"Deseja remover o grupo '{group.Name}' e todos os seus aplicativos?";
+                string title = "Confirmar Remoção";
+
+                if (_dialogService.ShowConfirmationDialog(message, title))
+                {
+                    MenuGroups.Remove(group);
+                    Debug.WriteLine($"Grupo removido: {group.Name}");
+                    _mainViewModel.SaveConfiguration();
+                }
             }
         }
-
         private void AddAppFromDialog()
         {
             if (MenuGroups.Count == 0)
