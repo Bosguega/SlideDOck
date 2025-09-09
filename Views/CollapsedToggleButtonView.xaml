@@ -3,32 +3,103 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:viewmodels="clr-namespace:SlideDOck.ViewModels"
              mc:Ignorable="d"
-             d:DesignHeight="600" d:DesignWidth="30"
+             d:DesignHeight="150" d:DesignWidth="30"
              DataContext="{Binding}">
-	<Border Background="#CC2D2D30"
+
+    <UserControl.Resources>
+        <!-- Rotaciona o texto para vertical -->
+        <RotateTransform x:Key="RotateTextTransform" Angle="270"/>
+
+        <!-- Estilo do botao com hover de aumento e sombra leve -->
+        <Style x:Key="DockButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <!-- remove foco azul -->
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Effect">
+                <!-- sombra sutil padrao -->
+                <Setter.Value>
+                    <DropShadowEffect Color="Black" BlurRadius="5" Opacity="0.2" ShadowDepth="0"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <!-- Aumenta suavemente -->
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                                 To="1.2" Duration="0:0:0.2"/>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                 To="1.2" Duration="0:0:0.2"/>
+                                <!-- sombra levemente mais visivel -->
+                                <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity"
+                                                 To="0.4" Duration="0:0:0.2"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                                 To="1" Duration="0:0:0.2"/>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                 To="1" Duration="0:0:0.2"/>
+                                <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity"
+                                                 To="0.2" Duration="0:0:0.2"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <!-- Border flutuante -->
+    <Border Background="#CC2D2D30"
             BorderBrush="#FF3E3E42"
             BorderThickness="1"
             CornerRadius="0,8,8,0"
+        Width="30"
+            Padding="4"
+            VerticalAlignment="Center"
             HorizontalAlignment="Left"
-            Width="30"
-            Visibility="{Binding IsExpanded, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-		<Button Style="{StaticResource IconButtonStyle}"
-                Command="{Binding ToggleDockCommand}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
+            Visibility="{Binding IsExpanded, Converter={StaticResource InverseBoolToVisibilityConverter}}" Height="103">
+
+        <Button Command="{Binding ToggleDockCommand}"
+                Style="{StaticResource DockButtonStyle}"
                 ToolTip="Abrir SlideDOck">
-			<Path Data="M0,0 L10,5 L0,10 Z"
-                  Fill="White"
-                  Stretch="Uniform"
-                  Width="12"
-                  Height="12"
-                  RenderTransformOrigin="0.5,0.5">
-				<Path.RenderTransform>
-					<RotateTransform Angle="180"/>
-				</Path.RenderTransform>
-			</Path>
-		</Button>
-	</Border>
+
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <!-- Texto SlideDOck na vertical -->
+                <TextBlock Text="SlideDOck"
+                           Foreground="White"
+                           FontWeight="Bold"
+                           FontSize="13"
+                           TextAlignment="Center"
+                           LayoutTransform="{StaticResource RotateTextTransform}"
+                           Margin="0,0,0,4"/>
+
+                <!-- Setinha -->
+                <Path Data="M0,0 L10,5 L0,10 Z"
+                      Fill="White"
+                      Stretch="Uniform"
+                      Width="12"
+                      Height="12"
+                      RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <RotateTransform Angle="180"/>
+                    </Path.RenderTransform>
+                </Path>
+            </StackPanel>
+        </Button>
+    </Border>
 </UserControl>

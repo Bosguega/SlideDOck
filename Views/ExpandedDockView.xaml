@@ -6,81 +6,177 @@
              xmlns:viewmodels="clr-namespace:SlideDOck.ViewModels"
              xmlns:local="clr-namespace:SlideDOck.Views"
              mc:Ignorable="d"
-             d:DesignHeight="600" d:DesignWidth="250"
+             d:DesignHeight="600" d:DesignWidth="280"
              DataContext="{Binding}">
-    <Border Background="#CC2D2D30"
-            BorderBrush="#FF3E3E42"
-            BorderThickness="1"
-            CornerRadius="0,8,8,0"
-            Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisibilityConverter}}"
-            HorizontalAlignment="Left"
-            Width="250"
-            Drop="MainWindow_Drop"
-            DragEnter="MainWindow_DragEnter">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="40"/>
-                <RowDefinition Height="40"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Border Grid.Row="0" Background="#FF3E3E42">
-                <Grid>
-                    <TextBlock Text="SlideDOck"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left"
-                               Margin="10,0,0,0"
+
+    <UserControl.Resources>
+        <!-- Rotaciona o texto para vertical -->
+        <RotateTransform x:Key="RotateTextTransform" Angle="270"/>
+
+        <!-- Estilo do botão com hover de aumento e sombra leve -->
+        <Style x:Key="DockButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="Black" BlurRadius="5" Opacity="0.2" ShadowDepth="0"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                                 To="1.2" Duration="0:0:0.2"/>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                 To="1.2" Duration="0:0:0.2"/>
+                                <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity"
+                                                 To="0.4" Duration="0:0:0.2"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                                 To="1" Duration="0:0:0.2"/>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                 To="1" Duration="0:0:0.2"/>
+                                <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity"
+                                                 To="0.2" Duration="0:0:0.2"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ScrollViewer estilo discreto -->
+        <Style TargetType="ScrollBar" x:Key="TransparentScrollBar">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="Height" Value="8"/>
+            <Setter Property="Opacity" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.5"/>
+                    <Setter Property="Background" Value="#80000000"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Barra expandida -->
+        <Border Background="#CC2D2D30"
+                BorderBrush="#FF3E3E42"
+                BorderThickness="1"
+                CornerRadius="0,0,0,0"
+                Width="250"
+                HorizontalAlignment="Left"
+                Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisibilityConverter}}"
+                Drop="MainWindow_Drop"
+                DragEnter="MainWindow_DragEnter">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="189*"/>
+                    <ColumnDefinition Width="59*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <!-- Menu superior com botões -->
+                    <RowDefinition Height="*"/>
+                    <!-- Conteúdo da barra -->
+                </Grid.RowDefinitions>
+
+                <!-- Menu superior com botões -->
+                <Border Grid.Row="0" Background="#FF3E3E42" Grid.ColumnSpan="2">
+                    <Grid>
+                        <TextBlock Text="SlideDOck"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Left"
+                                   Margin="10,0,0,0"
+                                   Foreground="White"
+                                   FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <Button Style="{StaticResource IconButtonStyle}"
+                                    Command="{Binding DockManager.AddMenuGroupCommand}"
+                                    ToolTip="Adicionar Grupo">
+                                <Path Data="M12,6 L12,18 M6,12 L18,12"
+                                      Stroke="White"
+                                      StrokeThickness="2"/>
+                            </Button>
+                            <Button Style="{StaticResource IconButtonStyle}"
+                                    Command="{Binding CloseApplicationCommand}"
+                                    ToolTip="Sair">
+                                <Path Data="M0,0 L10,10 M0,10 L10,0"
+                                      Stroke="Red"
+                                      StrokeThickness="2"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Conteúdo da barra (scroll) -->
+                <ScrollViewer Grid.Row="1"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled" Grid.ColumnSpan="2">
+                    <ScrollViewer.Resources>
+                        <Style TargetType="ScrollBar" BasedOn="{StaticResource TransparentScrollBar}"/>
+                    </ScrollViewer.Resources>
+                    <ItemsControl ItemsSource="{Binding DockManager.MenuGroups}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <local:MenuGroupView />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!-- Alça vertical à direita da barra -->
+        <Border Grid.ZIndex="10"
+                Background="#CC2D2D30"
+            Width="30"
+                HorizontalAlignment="Left"
+                Margin="250,0,0,0"
+                CornerRadius="0,8,8,0"
+                Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Button Command="{Binding ToggleDockCommand}"
+                    Style="{StaticResource DockButtonStyle}"
+                    ToolTip="Ocultar SlideDOck"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="Ocultar SlideDOck"
                                Foreground="White"
-                               FontWeight="Bold"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Style="{StaticResource IconButtonStyle}"
-                                Command="{Binding DockManager.AddMenuGroupCommand}"
-                                ToolTip="Adicionar Grupo">
-                            <Path Data="M12,6 L12,18 M6,12 L18,12"
-                                  Stroke="White"
-                                  StrokeThickness="2"/>
-                        </Button>
-                        <Button Style="{StaticResource IconButtonStyle}"
-                                Command="{Binding DockManager.AddAppFromDialogCommand}"
-                                ToolTip="Adicionar App">
-                            <Path Data="M12,6 L12,18 M6,12 L18,12"
-                                  Stroke="White"
-                                  StrokeThickness="2"/>
-                        </Button>
-                        <Button Style="{StaticResource IconButtonStyle}"
-                                Command="{Binding ToggleDockCommand}"
-                                ToolTip="Fechar">
-                            <Path Data="M0,0 L10,5 L0,10 Z"
-                                  Fill="White"
-                                  Stretch="Uniform"
-                                  Width="12"
-                                  Height="12"/>
-                        </Button>
-                        <Button Style="{StaticResource IconButtonStyle}"
-                                Command="{Binding CloseApplicationCommand}"
-                                ToolTip="Sair">
-                            <Path Data="M0,0 L10,10 M0,10 L10,0"
-                                  Stroke="Red"
-                                  StrokeThickness="2"/>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-            </Border>
-            <Border Grid.Row="1" Background="#FF2D2D30">
-                <TextBlock Text="Grupos de Aplicativos"
-                           VerticalAlignment="Center"
-                           Margin="10,0,0,0"
-                           Foreground="LightGray"
-                           FontSize="12"/>
-            </Border>
-            <ScrollViewer Grid.Row="2">
-                <ItemsControl ItemsSource="{Binding DockManager.MenuGroups}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <local:MenuGroupView />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
-        </Grid>
-    </Border>
+                               FontWeight="Bold"
+                               FontSize="13"
+                               TextAlignment="Center"
+                               LayoutTransform="{StaticResource RotateTextTransform}"
+                               Margin="0,0,0,4"/>
+                    <Path Data="M0,0 L10,5 L0,10 Z"
+                          Fill="White"
+                          Width="12" Height="12"
+                          RenderTransformOrigin="0.5,0.5">
+                        <Path.RenderTransform>
+                            <RotateTransform Angle="180"/>
+                        </Path.RenderTransform>
+                    </Path>
+                </StackPanel>
+            </Button>
+        </Border>
+
+    </Grid>
 </UserControl>
