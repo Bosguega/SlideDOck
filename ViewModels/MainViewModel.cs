@@ -17,6 +17,7 @@ namespace SlideDOck.ViewModels
 
         public DockManagerViewModel DockManager { get; }
 
+        // Comandos que permanecem
         public ICommand ToggleDockCommand { get; }
         public ICommand CloseApplicationCommand { get; }
 
