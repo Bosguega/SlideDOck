@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace SlideDOck.Commands;
+namespace SlideDock.Commands;
 
 public class RelayCommand : ICommand
 {

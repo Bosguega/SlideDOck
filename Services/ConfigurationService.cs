@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
-using SlideDOck.Models;
-using SlideDOck.ViewModels;
+using SlideDock.Models;
+using SlideDock.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace SlideDOck.Services
+namespace SlideDock.Services
 {
     public class ConfigurationService
     {
@@ -17,7 +17,7 @@ namespace SlideDOck.Services
         public ConfigurationService(ISampleDataProvider sampleDataProvider)
         {
             _sampleDataProvider = sampleDataProvider;
-            string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SlideDOck");
+            string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SlideDock");
             if (!Directory.Exists(appDataPath))
             {
                 Directory.CreateDirectory(appDataPath);

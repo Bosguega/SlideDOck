@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows</TargetFramework>
-		<UseWPF>true</UseWPF>
-		<Nullable>enable</Nullable>
-	</PropertyGroup>
+<PropertyGroup>
+  <OutputType>WinExe</OutputType>
+  <TargetFramework>net8.0-windows</TargetFramework>
+  <UseWPF>true</UseWPF>
+  <Nullable>enable</Nullable>
+  <AssemblyName>SlideDock</AssemblyName>
+  <RootNamespace>SlideDock</RootNamespace>
+</PropertyGroup>
 
 	<ItemGroup>
 	  <PackageReference Include="FontAwesome.WPF" Version="4.7.0.9" />

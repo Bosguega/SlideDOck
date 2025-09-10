@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 
-namespace SlideDOck.Models
+namespace SlideDock.Models
 {
     public class MenuGroup : INotifyPropertyChanged
     {

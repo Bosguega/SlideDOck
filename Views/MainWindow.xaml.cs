@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace SlideDOck.Views
+namespace SlideDock.Views
 {
     public partial class MainWindow : Window
     {

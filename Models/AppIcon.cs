@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows.Media.Imaging;
 
-namespace SlideDOck.Models
+namespace SlideDock.Models
 {
     public class AppIcon : INotifyPropertyChanged
     {

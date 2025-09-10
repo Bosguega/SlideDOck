@@ -3,10 +3,11 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 
-namespace SlideDOck
+namespace SlideDock
 {
     public partial class App : Application
     {
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);

@@ -1,7 +1,7 @@
-﻿using SlideDOck.Models;
+﻿using SlideDock.Models;
 using System.Collections.Generic;
 
-namespace SlideDOck.Services
+namespace SlideDock.Services
 {
     public class SampleDataProvider : ISampleDataProvider
     {

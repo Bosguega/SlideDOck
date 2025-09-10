@@ -3,7 +3,7 @@ using Microsoft.Win32;
 using System.IO;
 using System.Linq;
 
-namespace SlideDOck.Services
+namespace SlideDock.Services
 {
     public class FileInteractionService : IFileInteractionService
     {

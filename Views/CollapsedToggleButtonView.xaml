@@ -1,4 +1,4 @@
-<UserControl x:Class="SlideDOck.Views.CollapsedToggleButtonView"
+<UserControl x:Class="SlideDock.Views.CollapsedToggleButtonView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -76,11 +76,11 @@
 
         <Button Command="{Binding ToggleDockCommand}"
                 Style="{StaticResource DockButtonStyle}"
-                ToolTip="Abrir SlideDOck">
+                ToolTip="Abrir SlideDock">
 
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <!-- Texto SlideDOck na vertical -->
-                <TextBlock Text="SlideDOck"
+                <!-- Texto SlideDock na vertical -->
+                <TextBlock Text="SlideDock"
                            Foreground="White"
                            FontWeight="Bold"
                            FontSize="13"

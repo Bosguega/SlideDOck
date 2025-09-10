@@ -1,6 +1,6 @@
-﻿using SlideDOck.Models;
-using SlideDOck.Commands;
-using SlideDOck.Services;
+﻿using SlideDock.Models;
+using SlideDock.Commands;
+using SlideDock.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -8,7 +8,7 @@ using System.Windows;
 using System.Diagnostics;
 using System.IO;
 
-namespace SlideDOck.ViewModels
+namespace SlideDock.ViewModels
 {
     public class DockManagerViewModel : INotifyPropertyChanged
     {
@@ -62,7 +62,7 @@ namespace SlideDOck.ViewModels
         {
             if (MenuGroups.Count == 0)
             {
-                MessageBox.Show("Adicione um grupo primeiro!", "SlideDOck", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Adicione um grupo primeiro!", "SlideDock", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 

@@ -4,9 +4,9 @@ using System.Windows.Input;
 using System.IO;
 using System.Linq;
 using System.Windows.Media;
-using SlideDOck.Services;
+using SlideDock.Services;
 
-namespace SlideDOck.Views
+namespace SlideDock.Views
 {
     public partial class ExpandedDockView : UserControl
     {

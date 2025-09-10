@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace SlideDOck.Views
+namespace SlideDock.Views
 {
     public partial class MenuGroupView : UserControl
     {

@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 
-namespace SlideDOck.Utils
+namespace SlideDock.Utils
 {
     public static class IconExtractor
     {

@@ -1,7 +1,7 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace SlideDOck.Views
+namespace SlideDock.Views
 {
     public partial class AppIconView : UserControl
     {

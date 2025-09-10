@@ -1,7 +1,7 @@
 ﻿using Microsoft.Win32;
-using SlideDOck.Commands;
-using SlideDOck.Models;
-using SlideDOck.Services;
+using SlideDock.Commands;
+using SlideDock.Models;
+using SlideDock.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
-namespace SlideDOck.ViewModels
+namespace SlideDock.ViewModels
 {
     public class MenuGroupViewModel : INotifyPropertyChanged
     {

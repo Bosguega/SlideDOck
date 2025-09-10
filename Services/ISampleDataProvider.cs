@@ -1,6 +1,6 @@
-﻿using SlideDOck.Models;
+﻿using SlideDock.Models;
 
-namespace SlideDOck.Services
+namespace SlideDock.Services
 {
     public interface ISampleDataProvider
     {

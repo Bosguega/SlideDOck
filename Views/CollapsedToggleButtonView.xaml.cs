@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace SlideDOck.Views
+namespace SlideDock.Views
 {
     public partial class CollapsedToggleButtonView : UserControl
     {

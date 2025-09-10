@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SlideDOck.Models
+namespace SlideDock.Models
 {
     public class DockConfiguration
     {

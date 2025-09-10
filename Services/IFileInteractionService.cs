@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace SlideDOck.Services
+namespace SlideDock.Services
 {
     public interface IFileInteractionService
     {

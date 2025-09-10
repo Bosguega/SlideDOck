@@ -1,15 +1,15 @@
-﻿using SlideDOck.Models;
-using SlideDOck.Commands;
+﻿using SlideDock.Models;
+using SlideDock.Commands;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using SlideDOck.Utils;
+using SlideDock.Utils;
 using System;
 using System.Windows;
 
-namespace SlideDOck.ViewModels
+namespace SlideDock.ViewModels
 {
     public class AppIconViewModel : INotifyPropertyChanged
     {

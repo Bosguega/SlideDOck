@@ -1,13 +1,13 @@
-﻿using SlideDOck.Models;
-using SlideDOck.Commands;
-using SlideDOck.Services;
+﻿using SlideDock.Models;
+using SlideDock.Commands;
+using SlideDock.Services;
 using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows;
 using System.Diagnostics;
 using System;
 
-namespace SlideDOck.ViewModels
+namespace SlideDock.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
