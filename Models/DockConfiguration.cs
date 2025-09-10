@@ -4,6 +4,8 @@ namespace SlideDock.Models
 {
     public class DockConfiguration
     {
+        public bool IsExpanded { get; set; }
+        public DockPosition DockPosition { get; set; }
         public List<MenuGroupData> MenuGroups { get; set; } = new List<MenuGroupData>();
     }
 

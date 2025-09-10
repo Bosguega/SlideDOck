@@ -92,9 +92,13 @@ public void SaveConfiguration(DockConfiguration config)
             }
         }
 
-        public void SaveMenuGroups(IEnumerable<MenuGroupViewModel> menuGroups)
+        public void SaveMenuGroups(IEnumerable<MenuGroupViewModel> menuGroups, bool isExpanded, DockPosition dockPosition)
         {
-            var config = new DockConfiguration();
+            var config = new DockConfiguration
+            {
+                IsExpanded = isExpanded,
+                DockPosition = dockPosition
+            };
 
             Debug.WriteLine($"Iniciando salvamento de {menuGroups.Count()} grupos");
 

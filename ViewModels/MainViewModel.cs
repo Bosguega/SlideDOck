@@ -33,7 +33,6 @@ namespace SlideDock.ViewModels
             ToggleDockCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             CloseApplicationCommand = new RelayCommand(_ => CloseApplication());
             LoadConfiguration();
-            DockPosition = DockPosition.Left; // Posição inicial
         }
 
         public bool IsExpanded
@@ -67,7 +66,7 @@ namespace SlideDock.ViewModels
             try
             {
                 Debug.WriteLine("Salvando configuração...");
-                _configService.SaveMenuGroups(DockManager.MenuGroups);
+                _configService.SaveMenuGroups(DockManager.MenuGroups, IsExpanded, DockPosition);
                 Debug.WriteLine($"Configuração salva com {DockManager.MenuGroups.Count} grupos");
             }
             catch (Exception ex)
@@ -84,6 +83,10 @@ namespace SlideDock.ViewModels
                 Debug.WriteLine("Iniciando carregamento da configuração...");
                 var config = _configService.LoadConfiguration();
                 Debug.WriteLine($"Configuração carregada com {config.MenuGroups.Count} grupos");
+
+                // Load IsExpanded and DockPosition
+                IsExpanded = config.IsExpanded;
+                DockPosition = config.DockPosition;
 
                 DockManager.MenuGroups.Clear();
 
