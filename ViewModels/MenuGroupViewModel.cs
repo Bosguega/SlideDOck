@@ -168,6 +168,43 @@ namespace SlideDock.ViewModels
             }
         }
 
+        public void ReorderAppIcon(AppIconViewModel appIcon, int newIndex)
+        {
+            if (appIcon == null || !AppIcons.Contains(appIcon)) return;
+
+            int currentIndex = AppIcons.IndexOf(appIcon);
+            if (currentIndex == newIndex) return;
+
+            // Clamp the new index to valid range
+            newIndex = Math.Max(0, Math.Min(newIndex, AppIcons.Count - 1));
+
+            // Remove from current position
+            AppIcons.RemoveAt(currentIndex);
+
+            // Insert at new position
+            AppIcons.Insert(newIndex, appIcon);
+
+            // Update the model to match the ViewModel order
+            SyncModelFromViewModel();
+
+            Debug.WriteLine($"App reordenado: {appIcon.Name} de posição {currentIndex} para {newIndex}");
+            _mainViewModel.SaveConfiguration();
+        }
+
+        private void SyncModelFromViewModel()
+        {
+            _model.AppIcons.Clear();
+            foreach (var appIconViewModel in AppIcons)
+            {
+                var modelAppIcon = new AppIcon
+                {
+                    Name = appIconViewModel.Name,
+                    ExecutablePath = appIconViewModel.ExecutablePath
+                };
+                _model.AppIcons.Add(modelAppIcon);
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
         {
