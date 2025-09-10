@@ -29,7 +29,7 @@ namespace SlideDock.ViewModels
         {
             _model = model;
             _mainViewModel = mainViewModel;
-            _dialogService = dialogService;
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
 
             ToggleExpandCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             AddAppCommand = new RelayCommand(_ => AddAppFromDialog());
@@ -68,7 +68,8 @@ namespace SlideDock.ViewModels
             AppIcons.Clear();
             foreach (var appIcon in _model.AppIcons)
             {
-                var appIconViewModel = new AppIconViewModel(appIcon);
+                // 4. Passar _dialogService para o construtor do AppIconViewModel
+                var appIconViewModel = new AppIconViewModel(appIcon, _dialogService); // <-- Modificação aqui
                 appIconViewModel.RemoveRequested += (sender, e) => RemoveApp(appIconViewModel);
                 appIconViewModel.OpenFolderRequested += (sender, e) => OpenAppFolder(appIconViewModel);
                 AppIcons.Add(appIconViewModel);
@@ -89,7 +90,8 @@ namespace SlideDock.ViewModels
             _model.AppIcons.Add(appIcon);
 
             // Depois cria o ViewModel e adiciona à coleção
-            var appIconViewModel = new AppIconViewModel(appIcon);
+            // 5. Passar _dialogService para o construtor do AppIconViewModel
+            var appIconViewModel = new AppIconViewModel(appIcon, _dialogService); // <-- Modificação aqui
             appIconViewModel.RemoveRequested += (sender, e) => RemoveApp(appIconViewModel);
             appIconViewModel.OpenFolderRequested += (sender, e) => OpenAppFolder(appIconViewModel);
             AppIcons.Add(appIconViewModel);
@@ -105,6 +107,12 @@ namespace SlideDock.ViewModels
                 Filter = "Executáveis (*.exe)|*.exe|Todos os arquivos (*.*)|*.*",
                 Title = "Selecione um aplicativo"
             };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                // Chama AddAppIcon, que agora passa _dialogService
+                AddAppIcon(openFileDialog.FileName);
+            }
 
             if (openFileDialog.ShowDialog() == true)
             {
