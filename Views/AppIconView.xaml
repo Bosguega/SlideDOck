@@ -10,6 +10,7 @@
 	<Button Style="{StaticResource AppButtonStyle}"
             Command="{Binding LaunchAppCommand}"
             ToolTip="{Binding Name}"
+            PreviewMouseLeftButtonDown="AppIcon_PreviewMouseLeftButtonDown"
             MouseMove="AppIcon_MouseMove">
 		<Button.ContextMenu>
 			<ContextMenu>

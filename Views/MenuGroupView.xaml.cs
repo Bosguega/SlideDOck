@@ -2,43 +2,103 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using SlideDock.Services;
+using SlideDock.ViewModels;
+using SlideDock.Views;
+using System.Diagnostics;
 
 namespace SlideDock.Views
 {
     public partial class MenuGroupView : UserControl
     {
+        private readonly IFileInteractionService _fileInteractionService;
+
         public MenuGroupView()
         {
             InitializeComponent();
+            _fileInteractionService = new FileInteractionService();
         }
 
-        private void AppIcons_Drop(object sender, DragEventArgs e)
+        private void MenuGroup_Drop(object sender, DragEventArgs e)
         {
-            var parentDockView = FindVisualParent<ExpandedDockView>(this);
-            if (parentDockView != null)
+            Debug.WriteLine($"Drop no grupo: {(this.DataContext as MenuGroupViewModel)?.Name}");
+            if (this.DataContext is MenuGroupViewModel targetGroup)
             {
-                parentDockView.MainWindow_Drop(sender, e);
+                if (e.Data.GetDataPresent("SlideDockAppIcon"))
+                {
+                    Debug.WriteLine($"Drop de SlideDockAppIcon detectado no grupo: {targetGroup.Name}");
+                    AppIconDragData dragData = e.Data.GetData("SlideDockAppIcon") as AppIconDragData;
+                    if (dragData != null && dragData.AppIcon != null && dragData.SourceGroup != null)
+                    {
+                        Debug.WriteLine($"AppIcon: {dragData.AppIcon.Name}, Origem: {dragData.SourceGroup.Name}, Destino: {targetGroup.Name}");
+                        // Certifique-se de que o AppIconView tem acesso ao MainViewModel
+                        // Para mover entre grupos, precisamos do DockManagerViewModel (que está no MainViewModel)
+                        MainViewModel mainViewModel = FindParent<ExpandedDockView>(this)?.DataContext as MainViewModel;
+                        if (mainViewModel != null)
+                        {
+                            mainViewModel.DockManager.MoveAppIconBetweenGroups(dragData.AppIcon, dragData.SourceGroup, targetGroup);
+                        }
+                    }
+                }
+                else if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                {
+                    Debug.WriteLine($"Drop de arquivo externo detectado no grupo: {targetGroup.Name}");
+                    string[] files = _fileInteractionService.GetDroppedFiles(e);
+                    foreach (string file in files)
+                    {
+                        targetGroup.AddAppIcon(file);
+                    }
+                }
             }
+            e.Handled = true; // Marca o evento como manipulado para evitar que ele borbulhe.
         }
 
-        private void AppIcons_DragEnter(object sender, DragEventArgs e)
+        private void MenuGroup_DragEnter(object sender, DragEventArgs e)
         {
-            var parentDockView = FindVisualParent<ExpandedDockView>(this);
-            if (parentDockView != null)
+            Debug.WriteLine($"DragEnter no grupo: {(this.DataContext as MenuGroupViewModel)?.Name}");
+            if (e.Data.GetDataPresent("SlideDockAppIcon"))
             {
-                parentDockView.MainWindow_DragEnter(sender, e);
+                Debug.WriteLine($"DragEnter: SlideDockAppIcon presente. Grupo atual: {(this.DataContext as MenuGroupViewModel)?.Name}");
+                // Se estamos arrastando um AppIcon de dentro do app, permitir Move
+                AppIconDragData dragData = e.Data.GetData("SlideDockAppIcon") as AppIconDragData;
+                if (dragData != null && dragData.SourceGroup != (this.DataContext as MenuGroupViewModel))
+                {
+                    e.Effects = DragDropEffects.Move;
+                    Debug.WriteLine($"DragEnter: Permitindo Move. Effects={e.Effects}");
+                }
+                else
+                {
+                    // Não permitir mover para o mesmo grupo
+                    e.Effects = DragDropEffects.None;
+                    Debug.WriteLine($"DragEnter: Não permitindo Move (mesmo grupo). Effects={e.Effects}");
+                }
             }
+            else if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                Debug.WriteLine($"DragEnter: FileDrop presente. Grupo atual: {(this.DataContext as MenuGroupViewModel)?.Name}");
+                // Se estamos arrastando um arquivo externo, permitir Copy
+                string[] files = _fileInteractionService.GetDroppedFiles(e);
+                e.Effects = files.Length > 0 ? DragDropEffects.Copy : DragDropEffects.None;
+                Debug.WriteLine($"DragEnter: Permitindo Copy (arquivo externo). Effects={e.Effects}");
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+                Debug.WriteLine($"DragEnter: Nenhum tipo de dado reconhecido. Effects={e.Effects}");
+            }
+            e.Handled = true;
         }
 
-        private static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        // Helper para encontrar um pai visual de um determinado tipo
+        private static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);
             if (parentObject == null) return null;
-            T parent = parentObject as T;
-            if (parent != null)
+
+            if (parentObject is T parent)
                 return parent;
             else
-                return FindVisualParent<T>(parentObject);
+                return FindParent<T>(parentObject);
         }
     }
 }

@@ -77,8 +77,14 @@ namespace SlideDock.ViewModels
             Debug.WriteLine($"Sincronização concluída. ViewModel agora tem {AppIcons.Count} aplicativos");
         }
 
-        public void AddAppIcon(AppIcon appIcon)
+        public void AddAppIcon(string filePath)
         {
+            var appIcon = new AppIcon
+            {
+                Name = Path.GetFileNameWithoutExtension(filePath),
+                ExecutablePath = filePath
+            };
+
             // Adiciona ao modelo primeiro
             _model.AppIcons.Add(appIcon);
 
@@ -89,6 +95,7 @@ namespace SlideDock.ViewModels
             AppIcons.Add(appIconViewModel);
 
             Debug.WriteLine($"App adicionado ao grupo: {appIcon.Name}. Total no modelo: {_model.AppIcons.Count}, Total no ViewModel: {AppIcons.Count}");
+            _mainViewModel.SaveConfiguration();
         }
 
         private void AddAppFromDialog()
@@ -107,8 +114,7 @@ namespace SlideDock.ViewModels
                     ExecutablePath = openFileDialog.FileName
                 };
 
-                AddAppIcon(appIcon);
-                _mainViewModel.SaveConfiguration();
+                AddAppIcon(openFileDialog.FileName);
             }
         }
 
@@ -121,20 +127,26 @@ namespace SlideDock.ViewModels
 
                 if (_dialogService.ShowConfirmationDialog(message, title))
                 {
-                    // Remove do ViewModel
-                    AppIcons.Remove(appViewModel);
-
-                    // Encontra e remove do modelo
-                    var modelToRemove = _model.AppIcons.FirstOrDefault(a => a.ExecutablePath == appViewModel.ExecutablePath);
-                    if (modelToRemove != null)
-                    {
-                        _model.AppIcons.Remove(modelToRemove);
-                        Debug.WriteLine($"App removido do grupo: {appViewModel.Name}. Restantes no modelo: {_model.AppIcons.Count}");
-                    }
-
-                    _mainViewModel.SaveConfiguration();
+                    RemoveAppIcon(appViewModel);
                 }
             }
+        }
+
+        public void RemoveAppIcon(AppIconViewModel appViewModel)
+        {
+            if (appViewModel == null) return;
+
+            // Remove do ViewModel
+            AppIcons.Remove(appViewModel);
+
+            // Encontra e remove do modelo
+            var modelToRemove = _model.AppIcons.FirstOrDefault(a => a.ExecutablePath == appViewModel.ExecutablePath);
+            if (modelToRemove != null)
+            {
+                _model.AppIcons.Remove(modelToRemove);
+                Debug.WriteLine($"App removido do grupo: {appViewModel.Name}. Restantes no modelo: {_model.AppIcons.Count}");
+            }
+            _mainViewModel.SaveConfiguration();
         }
 
         private void OpenAppFolder(AppIconViewModel appViewModel)

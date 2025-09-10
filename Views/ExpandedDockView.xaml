@@ -86,7 +86,8 @@
                 Width="250"
                 Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisibilityConverter}}"
                 Drop="MainWindow_Drop"
-                DragEnter="MainWindow_DragEnter">
+                DragEnter="MainWindow_DragEnter"
+                AllowDrop="True">
             <Border.Style>
                 <Style TargetType="Border">
                     <Style.Triggers>

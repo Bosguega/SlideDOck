@@ -22,10 +22,14 @@ namespace SlideDock.Services
 
         public string[] GetDroppedExecutableFiles(DragEventArgs e)
         {
+            return GetDroppedFiles(e).Where(f => Path.GetExtension(f).ToLower() == ".exe").ToArray();
+        }
+
+        public string[] GetDroppedFiles(DragEventArgs e)
+        {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                return files.Where(f => Path.GetExtension(f).ToLower() == ".exe").ToArray();
+                return (string[])e.Data.GetData(DataFormats.FileDrop);
             }
             return new string[0];
         }

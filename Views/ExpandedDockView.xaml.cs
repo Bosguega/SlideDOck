@@ -20,7 +20,7 @@ namespace SlideDock.Views
 
         public void MainWindow_Drop(object sender, DragEventArgs e)
         {
-            string[] files = _fileInteractionService.GetDroppedExecutableFiles(e);
+            string[] files = _fileInteractionService.GetDroppedFiles(e);
             foreach (string file in files)
             {
                 AddAppFromFile(file);
@@ -29,7 +29,7 @@ namespace SlideDock.Views
 
         public void MainWindow_DragEnter(object sender, DragEventArgs e)
         {
-            string[] files = _fileInteractionService.GetDroppedExecutableFiles(e);
+            string[] files = _fileInteractionService.GetDroppedFiles(e);
             e.Effects = files.Length > 0 ? DragDropEffects.Copy : DragDropEffects.None;
             e.Handled = true;
         }

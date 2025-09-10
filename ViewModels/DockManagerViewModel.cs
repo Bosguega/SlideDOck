@@ -84,7 +84,7 @@ namespace SlideDock.ViewModels
                     Name = Path.GetFileNameWithoutExtension(filePath),
                     ExecutablePath = filePath
                 };
-                MenuGroups[0].AddAppIcon(appIcon);
+                MenuGroups[0].AddAppIcon(filePath);
                 Debug.WriteLine($"App adicionado ao grupo: {appIcon.Name}");
                 _mainViewModel.SaveConfiguration();
             }
@@ -104,10 +104,25 @@ namespace SlideDock.ViewModels
                     Name = Path.GetFileNameWithoutExtension(filePath),
                     ExecutablePath = filePath
                 };
-                MenuGroups[0].AddAppIcon(appIcon);
+                MenuGroups[0].AddAppIcon(filePath);
                 Debug.WriteLine($"App adicionado via arquivo: {appIcon.Name}");
                 _mainViewModel.SaveConfiguration();
             }
+        }
+
+        public void MoveAppIconBetweenGroups(AppIconViewModel appIcon, MenuGroupViewModel sourceGroup, MenuGroupViewModel targetGroup)
+        {
+            if (appIcon == null || sourceGroup == null || targetGroup == null || sourceGroup == targetGroup) return;
+
+            Debug.WriteLine($"Movendo App '{appIcon.Name}' de '{sourceGroup.Name}' para '{targetGroup.Name}'");
+
+            // Remove do grupo de origem
+            sourceGroup.RemoveAppIcon(appIcon);
+
+            // Adiciona ao grupo de destino
+            targetGroup.AddAppIcon(appIcon.ExecutablePath); // Usamos o método que aceita filePath
+
+            _mainViewModel.SaveConfiguration();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
