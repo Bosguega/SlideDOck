@@ -12,6 +12,9 @@
     <UserControl.Resources>
         <!-- Rotaciona o texto para vertical -->
         <RotateTransform x:Key="RotateTextTransform" Angle="270"/>
+        <RotateTransform x:Key="RotateTextTransformRight" Angle="90"/>
+        <RotateTransform x:Key="RotateTransform180" Angle="180"/>
+        <RotateTransform x:Key="RotateTransform0" Angle="0"/>
 
         <!-- Estilo do botão com hover e sombra leve -->
         <Style x:Key="DockButtonStyle" TargetType="Button">
@@ -80,12 +83,24 @@
         <Border Background="#CC2D2D30"
                 BorderBrush="#FF3E3E42"
                 BorderThickness="1"
-                CornerRadius="0,0,0,0"
                 Width="250"
-                HorizontalAlignment="Left"
                 Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisibilityConverter}}"
                 Drop="MainWindow_Drop"
                 DragEnter="MainWindow_DragEnter">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DataContext.DockPosition, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Left">
+                            <Setter Property="HorizontalAlignment" Value="Left"/>
+                            <Setter Property="CornerRadius" Value="0,0,0,0"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding DataContext.DockPosition, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Right">
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="CornerRadius" Value="0,0,0,0"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
 
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -181,10 +196,23 @@
         <Border Grid.ZIndex="10"
                 Background="#CC2D2D30"
                 Width="30"
-                HorizontalAlignment="Left"
-                Margin="250,0,0,0"
-                CornerRadius="0,8,8,0"
                 Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DataContext.DockPosition, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Left">
+                            <Setter Property="HorizontalAlignment" Value="Left"/>
+                            <Setter Property="Margin" Value="250,0,0,0"/>
+                            <Setter Property="CornerRadius" Value="0,8,8,0"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding DataContext.DockPosition, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Right">
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="Margin" Value="0,0,250,0"/>
+                            <Setter Property="CornerRadius" Value="8,0,0,8"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
             <Button Command="{Binding ToggleDockCommand}"
                     Style="{StaticResource DockButtonStyle}"
                     ToolTip="Ocultar SlideDock"
@@ -196,15 +224,36 @@
                                FontWeight="Bold"
                                FontSize="13"
                                TextAlignment="Center"
-                               LayoutTransform="{StaticResource RotateTextTransform}"
-                               Margin="0,0,0,4"/>
+                               Margin="0,0,0,4">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.DockPosition, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Left">
+                                        <Setter Property="LayoutTransform" Value="{StaticResource RotateTextTransform}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding DataContext.DockPosition, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Right">
+                                        <Setter Property="LayoutTransform" Value="{StaticResource RotateTextTransformRight}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                     <Path Data="M0,0 L10,5 L0,10 Z"
                           Fill="White"
                           Width="12" Height="12"
                           RenderTransformOrigin="0.5,0.5">
-                        <Path.RenderTransform>
-                            <RotateTransform Angle="180"/>
-                        </Path.RenderTransform>
+                        <Path.Style>
+                            <Style TargetType="Path">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.DockPosition, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Left">
+                                        <Setter Property="RenderTransform" Value="{StaticResource RotateTransform180}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding DataContext.DockPosition, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Right">
+                                        <Setter Property="RenderTransform" Value="{StaticResource RotateTransform0}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Path.Style>
                     </Path>
                 </StackPanel>
             </Button>

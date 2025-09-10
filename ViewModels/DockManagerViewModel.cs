@@ -21,6 +21,7 @@ namespace SlideDock.ViewModels
         public ICommand AddMenuGroupCommand { get; }
         public ICommand RemoveMenuGroupCommand { get; }
         public ICommand AddAppFromDialogCommand { get; }
+        public ICommand ToggleDockSideCommand { get; }
 
         public DockManagerViewModel(MainViewModel mainViewModel,
                                    IFileInteractionService fileInteractionService,
@@ -33,6 +34,7 @@ namespace SlideDock.ViewModels
             AddMenuGroupCommand = new RelayCommand(_ => AddNewMenuGroup());
             RemoveMenuGroupCommand = new RelayCommand(param => RemoveMenuGroup(param as MenuGroupViewModel));
             AddAppFromDialogCommand = new RelayCommand(_ => AddAppFromDialog());
+            ToggleDockSideCommand = new RelayCommand(_ => _mainViewModel.ToggleDockSide());
         }
 
         private void AddNewMenuGroup()

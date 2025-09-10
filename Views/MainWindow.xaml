@@ -17,6 +17,45 @@
     </Window.DataContext>
     <Grid>
         <local:ExpandedDockView />
-        <local:CollapsedToggleButtonView />
+        <local:CollapsedToggleButtonView x:Name="CollapsedView">
+            <local:CollapsedToggleButtonView.Style>
+                <Style TargetType="local:CollapsedToggleButtonView">
+                    <Style.Triggers>
+                        <!-- Dock na Esquerda e Colapsado -->
+                        <DataTrigger Binding="{Binding IsExpanded}" Value="False">
+                            <Setter Property="HorizontalAlignment" Value="Left"/>
+                            <Setter Property="Margin" Value="0"/>
+                        </DataTrigger>
+                        <!-- Dock na Direita e Colapsado -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsExpanded}" Value="False"/>
+                                <Condition Binding="{Binding DockPosition}" Value="Right"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="Margin" Value="0"/>
+                        </MultiDataTrigger>
+                        <!-- Dock na Esquerda e Expandido -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsExpanded}" Value="True"/>
+                                <Condition Binding="{Binding DockPosition}" Value="Left"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="HorizontalAlignment" Value="Left"/>
+                            <Setter Property="Margin" Value="0"/>
+                        </MultiDataTrigger>
+                        <!-- Dock na Direita e Expandido -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsExpanded}" Value="True"/>
+                                <Condition Binding="{Binding DockPosition}" Value="Right"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="Margin" Value="0"/>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </local:CollapsedToggleButtonView.Style>
+        </local:CollapsedToggleButtonView>
     </Grid>
 </Window>

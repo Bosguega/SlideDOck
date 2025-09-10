@@ -15,6 +15,7 @@ namespace SlideDock.ViewModels
         private readonly ConfigurationService _configService;
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IDialogService _dialogService;
+        private DockPosition _dockPosition;
 
         public DockManagerViewModel DockManager { get; }
 
@@ -32,6 +33,7 @@ namespace SlideDock.ViewModels
             ToggleDockCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             CloseApplicationCommand = new RelayCommand(_ => CloseApplication());
             LoadConfiguration();
+            DockPosition = DockPosition.Left; // Posição inicial
         }
 
         public bool IsExpanded
@@ -42,6 +44,22 @@ namespace SlideDock.ViewModels
                 _isExpanded = value;
                 OnPropertyChanged();
             }
+        }
+
+        public DockPosition DockPosition
+        {
+            get => _dockPosition;
+            set
+            {
+                _dockPosition = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public void ToggleDockSide()
+        {
+            DockPosition = (DockPosition == DockPosition.Left) ? DockPosition.Right : DockPosition.Left;
+            Debug.WriteLine($"Posição da dock alterada para: {DockPosition}");
         }
 
         public void SaveConfiguration()
