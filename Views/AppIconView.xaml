@@ -15,14 +15,55 @@
             MouseLeave="AppIcon_MouseLeave"
             Background="Transparent"
             ToolTip="{Binding Name}"
-            Cursor="Hand">
+            Cursor="Hand"
+            Margin="4"
+            Padding="6"
+            CornerRadius="8">
         <Border.Style>
             <Style TargetType="Border">
-                <!-- Adding hover effects similar to button style -->
+                <!-- Enhanced hover effects with smooth transitions and subtle shadow -->
                 <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                <Setter Property="RenderTransform">
+                    <Setter.Value>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="Black" BlurRadius="8" Opacity="0.1" ShadowDepth="2"/>
+                    </Setter.Value>
+                </Setter>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="#20FFFFFF"/>
+                        <Trigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                                     To="1.1" Duration="0:0:0.15"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                     To="1.1" Duration="0:0:0.15"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity"
+                                                     To="0.3" Duration="0:0:0.15"/>
+                                    <ColorAnimation Storyboard.TargetProperty="Background.Color"
+                                                    To="#30FFFFFF" Duration="0:0:0.15"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                                     To="1" Duration="0:0:0.15"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                     To="1" Duration="0:0:0.15"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity"
+                                                     To="0.1" Duration="0:0:0.15"/>
+                                    <ColorAnimation Storyboard.TargetProperty="Background.Color"
+                                                    To="Transparent" Duration="0:0:0.15"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
                     </Trigger>
                 </Style.Triggers>
             </Style>
@@ -37,8 +78,8 @@
         </Border.ContextMenu>
         <!-- Adding click handling through code-behind instead of Command binding -->
         <Image Source="{Binding IconSource}"
-               Width="24"
-               Height="24">
+               Width="48"
+               Height="48">
             <Image.Style>
                 <Style TargetType="Image">
                     <Setter Property="Source" Value="{Binding IconSource}"/>
@@ -50,7 +91,8 @@
                                         <DrawingImage.Drawing>
                                             <GeometryDrawing Brush="LightBlue">
                                                 <GeometryDrawing.Geometry>
-                                                    <RectangleGeometry Rect="0,0,24,24"/>
+                                                    <!-- Updated placeholder size to match new icon size -->
+                                                    <RectangleGeometry Rect="0,0,48,48"/>
                                                 </GeometryDrawing.Geometry>
                                             </GeometryDrawing>
                                         </DrawingImage.Drawing>
