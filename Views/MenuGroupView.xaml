@@ -11,7 +11,8 @@
     <Border Margin="2" Background="#22FFFFFF" CornerRadius="4"
             AllowDrop="True"
             Drop="MenuGroup_Drop"
-            DragEnter="MenuGroup_DragEnter">
+            DragEnter="MenuGroup_DragEnter"
+            DragOver="MenuGroup_DragOver">
         <Expander IsExpanded="{Binding IsExpanded}"
                   Background="Transparent"
                   BorderBrush="Transparent">

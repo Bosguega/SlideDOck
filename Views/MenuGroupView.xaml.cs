@@ -56,37 +56,41 @@ namespace SlideDock.Views
         private void MenuGroup_DragEnter(object sender, DragEventArgs e)
         {
             Debug.WriteLine($"DragEnter no grupo: {(this.DataContext as MenuGroupViewModel)?.Name}");
+            // A lógica principal de validação e efeitos será movida para MenuGroup_DragOver
+            e.Handled = true;
+        }
+
+        private void MenuGroup_DragOver(object sender, DragEventArgs e)
+        {
+            Debug.WriteLine($"DragOver no grupo: {(this.DataContext as MenuGroupViewModel)?.Name}");
             if (e.Data.GetDataPresent("SlideDockAppIcon"))
             {
-                Debug.WriteLine($"DragEnter: SlideDockAppIcon presente. Grupo atual: {(this.DataContext as MenuGroupViewModel)?.Name}");
-                // Se estamos arrastando um AppIcon de dentro do app, permitir Move
+                Debug.WriteLine($"DragOver: SlideDockAppIcon presente. Grupo atual: {(this.DataContext as MenuGroupViewModel)?.Name}");
                 AppIconDragData dragData = e.Data.GetData("SlideDockAppIcon") as AppIconDragData;
                 if (dragData != null && dragData.SourceGroup != (this.DataContext as MenuGroupViewModel))
                 {
                     e.Effects = DragDropEffects.Move;
-                    Debug.WriteLine($"DragEnter: Permitindo Move. Effects={e.Effects}");
+                    Debug.WriteLine($"DragOver: Permitindo Move. Effects={e.Effects}");
                 }
                 else
                 {
-                    // Não permitir mover para o mesmo grupo
                     e.Effects = DragDropEffects.None;
-                    Debug.WriteLine($"DragEnter: Não permitindo Move (mesmo grupo). Effects={e.Effects}");
+                    Debug.WriteLine($"DragOver: Não permitindo Move (mesmo grupo). Effects={e.Effects}");
                 }
             }
             else if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                Debug.WriteLine($"DragEnter: FileDrop presente. Grupo atual: {(this.DataContext as MenuGroupViewModel)?.Name}");
-                // Se estamos arrastando um arquivo externo, permitir Copy
+                Debug.WriteLine($"DragOver: FileDrop presente. Grupo atual: {(this.DataContext as MenuGroupViewModel)?.Name}");
                 string[] files = _fileInteractionService.GetDroppedFiles(e);
                 e.Effects = files.Length > 0 ? DragDropEffects.Copy : DragDropEffects.None;
-                Debug.WriteLine($"DragEnter: Permitindo Copy (arquivo externo). Effects={e.Effects}");
+                Debug.WriteLine($"DragOver: Permitindo Copy (arquivo externo). Effects={e.Effects}");
             }
             else
             {
                 e.Effects = DragDropEffects.None;
-                Debug.WriteLine($"DragEnter: Nenhum tipo de dado reconhecido. Effects={e.Effects}");
+                Debug.WriteLine($"DragOver: Nenhum tipo de dado reconhecido. Effects={e.Effects}");
             }
-            e.Handled = true;
+            e.Handled = true; // Essencial para que o Drop funcione
         }
 
         // Helper para encontrar um pai visual de um determinado tipo

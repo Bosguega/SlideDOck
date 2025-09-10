@@ -7,44 +7,60 @@
              mc:Ignorable="d"
              d:DesignHeight="50" d:DesignWidth="50"
              DataContext="{Binding}">
-	<Button Style="{StaticResource AppButtonStyle}"
-            Command="{Binding LaunchAppCommand}"
-            ToolTip="{Binding Name}"
+    <!-- Using Border instead of Button to avoid mouse event conflicts with drag and drop -->
+    <Border Name="AppIconBorder" 
             PreviewMouseLeftButtonDown="AppIcon_PreviewMouseLeftButtonDown"
-            MouseMove="AppIcon_MouseMove">
-		<Button.ContextMenu>
-			<ContextMenu>
-				<MenuItem Header="Remover App"
+            PreviewMouseLeftButtonUp="AppIcon_PreviewMouseLeftButtonUp"
+            MouseMove="AppIcon_MouseMove"
+            MouseLeave="AppIcon_MouseLeave"
+            Background="Transparent"
+            ToolTip="{Binding Name}"
+            Cursor="Hand">
+        <Border.Style>
+            <Style TargetType="Border">
+                <!-- Adding hover effects similar to button style -->
+                <Setter Property="Background" Value="Transparent"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#20FFFFFF"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <Border.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Remover App"
                           Command="{Binding RemoveAppCommand}"/>
-				<MenuItem Header="Abrir Pasta"
+                <MenuItem Header="Abrir Pasta"
                           Command="{Binding OpenFolderCommand}"/>
-			</ContextMenu>
-		</Button.ContextMenu>
-		<Image Source="{Binding IconSource}"
+            </ContextMenu>
+        </Border.ContextMenu>
+        <!-- Adding click handling through code-behind instead of Command binding -->
+        <Image Source="{Binding IconSource}"
                Width="24"
                Height="24">
-			<Image.Style>
-				<Style TargetType="Image">
-					<Setter Property="Source" Value="{Binding IconSource}"/>
-					<Style.Triggers>
-						<DataTrigger Binding="{Binding IconSource}" Value="{x:Null}">
-							<Setter Property="Source">
-								<Setter.Value>
-									<DrawingImage>
-										<DrawingImage.Drawing>
-											<GeometryDrawing Brush="LightBlue">
-												<GeometryDrawing.Geometry>
-													<RectangleGeometry Rect="0,0,24,24"/>
-												</GeometryDrawing.Geometry>
-											</GeometryDrawing>
-										</DrawingImage.Drawing>
-									</DrawingImage>
-								</Setter.Value>
-							</Setter>
-						</DataTrigger>
-					</Style.Triggers>
-				</Style>
-			</Image.Style>
-		</Image>
-	</Button>
+            <Image.Style>
+                <Style TargetType="Image">
+                    <Setter Property="Source" Value="{Binding IconSource}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IconSource}" Value="{x:Null}">
+                            <Setter Property="Source">
+                                <Setter.Value>
+                                    <DrawingImage>
+                                        <DrawingImage.Drawing>
+                                            <GeometryDrawing Brush="LightBlue">
+                                                <GeometryDrawing.Geometry>
+                                                    <RectangleGeometry Rect="0,0,24,24"/>
+                                                </GeometryDrawing.Geometry>
+                                            </GeometryDrawing>
+                                        </DrawingImage.Drawing>
+                                    </DrawingImage>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Image.Style>
+        </Image>
+    </Border>
 </UserControl>
