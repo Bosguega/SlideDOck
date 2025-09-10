@@ -77,32 +77,58 @@
             </ContextMenu>
         </Border.ContextMenu>
         <!-- Adding click handling through code-behind instead of Command binding -->
-        <Image Source="{Binding IconSource}"
-               Width="48"
-               Height="48">
-            <Image.Style>
-                <Style TargetType="Image">
-                    <Setter Property="Source" Value="{Binding IconSource}"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IconSource}" Value="{x:Null}">
-                            <Setter Property="Source">
-                                <Setter.Value>
-                                    <DrawingImage>
-                                        <DrawingImage.Drawing>
-                                            <GeometryDrawing Brush="LightBlue">
-                                                <GeometryDrawing.Geometry>
-                                                    <!-- Updated placeholder size to match new icon size -->
-                                                    <RectangleGeometry Rect="0,0,48,48"/>
-                                                </GeometryDrawing.Geometry>
-                                            </GeometryDrawing>
-                                        </DrawingImage.Drawing>
-                                    </DrawingImage>
-                                </Setter.Value>
-                            </Setter>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Image.Style>
-        </Image>
+        <StackPanel Orientation="Vertical" 
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+            <Image Source="{Binding IconSource}"
+                   Width="48"
+                   Height="48"
+                   HorizontalAlignment="Center">
+                <Image.Style>
+                    <Style TargetType="Image">
+                        <Setter Property="Source" Value="{Binding IconSource}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IconSource}" Value="{x:Null}">
+                                <Setter Property="Source">
+                                    <Setter.Value>
+                                        <DrawingImage>
+                                            <DrawingImage.Drawing>
+                                                <GeometryDrawing Brush="LightBlue">
+                                                    <GeometryDrawing.Geometry>
+                                                        <!-- Updated placeholder size to match new icon size -->
+                                                        <RectangleGeometry Rect="0,0,48,48"/>
+                                                    </GeometryDrawing.Geometry>
+                                                </GeometryDrawing>
+                                            </DrawingImage.Drawing>
+                                        </DrawingImage>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Image.Style>
+            </Image>
+
+            <!-- Added TextBlock to display file name below icon -->
+            <TextBlock Text="{Binding Name}"
+                       Foreground="White"
+                       FontSize="10"
+                       FontWeight="Normal"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       MaxWidth="60"
+                       Margin="0,4,0,0"
+                       HorizontalAlignment="Center">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect Color="Black" BlurRadius="2" Opacity="0.8" ShadowDepth="1"/>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </StackPanel>
     </Border>
 </UserControl>

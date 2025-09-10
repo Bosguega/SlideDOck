@@ -116,8 +116,8 @@
                     <ItemsControl ItemsSource="{Binding AppIcons}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <!-- Added ItemWidth and ItemHeight to WrapPanel for consistent spacing -->
-                                <WrapPanel ItemWidth="64" ItemHeight="64" Orientation="Horizontal"/>
+                                <!-- Increased ItemHeight from 64 to 80 to accommodate icon + text -->
+                                <WrapPanel ItemWidth="64" ItemHeight="80" Orientation="Horizontal"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
