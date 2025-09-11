@@ -69,7 +69,6 @@ namespace SlideDock.ViewModels
             try
             {
                 Debug.WriteLine("Salvando configuração...");
-                // Atualizado para usar o novo método SaveConfiguration que aceita o objeto completo
                 var config = new DockConfiguration
                 {
                     IsExpanded = this.IsExpanded,
@@ -90,22 +89,21 @@ namespace SlideDock.ViewModels
                         groupData.AppIcons.Add(new AppIconData
                         {
                             Name = appIconViewModel.Name,
-                            ExecutablePath = appIconViewModel.ExecutablePath
-                            // ItemType será adicionado ao AppIconData na próxima etapa se necessário
-                            // ItemType = appIconViewModel.ItemType // Se AppIconData tiver essa propriedade
+                            ExecutablePath = appIconViewModel.ExecutablePath,
+                            ItemType = appIconViewModel.ItemType // Salva o tipo
                         });
                     }
 
                     config.MenuGroups.Add(groupData);
                 }
 
-                _configService.SaveConfiguration(config);
-                Debug.WriteLine($"Configuração salva com {DockManager.MenuGroups.Count} grupos");
+                _configService.SaveConfiguration(config); // Salva a configuração completa
+                Debug.WriteLine($"Configuração salva com {DockManager.MenuGroups.Count} grupos ");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Erro ao salvar configuração: {ex.Message}");
-                Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                Debug.WriteLine($"Erro ao salvar configuração: {ex.Message} ");
+                Debug.WriteLine($"StackTrace: {ex.StackTrace} ");
             }
         }
 
@@ -114,9 +112,9 @@ namespace SlideDock.ViewModels
         {
             try
             {
-                Debug.WriteLine("Iniciando carregamento da configuração...");
+                Debug.WriteLine("Iniciando carregamento da configuração... ");
                 var config = _configService.LoadConfiguration();
-                Debug.WriteLine($"Configuração carregada com {config.MenuGroups.Count} grupos");
+                Debug.WriteLine($"Configuração carregada com {config.MenuGroups.Count} grupos ");
 
                 // Load IsExpanded and DockPosition
                 IsExpanded = config.IsExpanded;
@@ -126,7 +124,7 @@ namespace SlideDock.ViewModels
 
                 foreach (var groupData in config.MenuGroups)
                 {
-                    Debug.WriteLine($"Carregando grupo: {groupData.Name} com {groupData.AppIcons.Count} aplicativos");
+                    Debug.WriteLine($"Carregando grupo: {groupData.Name} com {groupData.AppIcons.Count} aplicativos ");
                     var group = new MenuGroup
                     {
                         Name = groupData.Name,
@@ -135,27 +133,28 @@ namespace SlideDock.ViewModels
 
                     foreach (var appData in groupData.AppIcons)
                     {
-                        Debug.WriteLine($"Carregando app: {appData.Name}, {appData.ExecutablePath}");
+                        Debug.WriteLine($"Carregando app: {appData.Name}, {appData.ExecutablePath} ");
                         var appIcon = new AppIcon
                         {
                             Name = appData.Name,
-                            ExecutablePath = appData.ExecutablePath
-                            // ItemType será carregado se AppIconData tiver essa propriedade
-                            // ItemType = appData.ItemType // Se AppIconData tiver essa propriedade
+                            ExecutablePath = appData.ExecutablePath,
+                            ItemType = appData.ItemType // Carrega o tipo salvo
                         };
                         group.AppIcons.Add(appIcon);
                     }
 
-                    // Passa os serviços injetados para o MenuGroupViewModel
+                    // Passa os serviços injetados (se estiver usando a versão atualizada)
+                    // var groupViewModel = new MenuGroupViewModel(group, this, _dialogService, _fileInteractionService);
+                    // Para compatibilidade com o código original, assumindo que não precisa injetar serviços aqui:
                     var groupViewModel = new MenuGroupViewModel(group, this, _dialogService, _fileInteractionService);
                     DockManager.MenuGroups.Add(groupViewModel);
-                    Debug.WriteLine($"Grupo '{groupData.Name}' adicionado com {groupViewModel.AppIcons.Count} aplicativos");
+                    Debug.WriteLine($"Grupo '{groupData.Name}' adicionado com {groupViewModel.AppIcons.Count} aplicativos ");
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Erro ao carregar configuração: {ex.Message}");
-                Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                Debug.WriteLine($"Erro ao carregar configuração: {ex.Message} ");
+                Debug.WriteLine($"StackTrace: {ex.StackTrace} ");
             }
         }
 
