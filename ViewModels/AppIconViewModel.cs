@@ -85,50 +85,50 @@ namespace SlideDock.ViewModels
         }
 
         private void LoadIcon()
+{
+    try
+    {
+        // Verificação de caminho não vazio
+        if (!string.IsNullOrEmpty(ExecutablePath))
         {
-            try
+            BitmapSource icon = null;
+
+            // Verifica se o item (arquivo ou pasta) existe antes de tentar carregar o ícone
+            if (ItemType == DockItemType.Folder && Directory.Exists(ExecutablePath))
             {
-                // Verificação de caminho não vazio
-                if (!string.IsNullOrEmpty(ExecutablePath))
+                // Tenta extrair o ícone da pasta
+                icon = IconExtractor.ExtractIconToBitmapSource(ExecutablePath);
+                // Se falhar, usa o ícone padrão para pastas
+                if (icon == null)
                 {
-                    BitmapSource icon = null;
-
-                    // Verifica se o item (arquivo ou pasta) existe antes de tentar carregar o ícone
-                    if (ItemType == DockItemType.Folder && Directory.Exists(ExecutablePath))
-                    {
-                        // Tenta extrair o ícone da pasta
-                        icon = IconExtractor.ExtractIconToBitmapSource(ExecutablePath);
-                        // Se falhar, usa o ícone padrão para pastas
-                        if (icon == null)
-                        {
-                            icon = IconExtractor.DefaultFolderIcon;
-                            Debug.WriteLine($"Usando ícone padrão para pasta '{Name}' ({ExecutablePath})");
-                        }
-                    }
-                    else if ((ItemType == DockItemType.Application || ItemType == DockItemType.File) && File.Exists(ExecutablePath))
-                    {
-                        // Tenta extrair o ícone do arquivo
-                        icon = IconExtractor.ExtractIconToBitmapSource(ExecutablePath);
-                        // Para arquivos, se falhar, o XAML cuida do placeholder
-                        if (icon == null)
-                        {
-                            Debug.WriteLine($"Ícone não encontrado para arquivo '{Name}' ({ExecutablePath})");
-                        }
-                    }
-                    // Se o item não existir, mantém o ícone atual ou usa o placeholder do XAML
-
-                    if (icon != null)
-                    {
-                        IconSource = icon;
-                    }
+                     icon = IconExtractor.DefaultFolderIcon;
+                     Debug.WriteLine($"Usando ícone padrão para pasta '{Name}' ({ExecutablePath})");
                 }
             }
-            catch (Exception ex) // Capturar exceções específicas é melhor
+            else if ((ItemType == DockItemType.Application || ItemType == DockItemType.File) && File.Exists(ExecutablePath))
             {
-                Debug.WriteLine($"Erro ao carregar ícone para {ExecutablePath} ({ItemType}): {ex.Message}");
-                // O XAML cuida do fallback
+                // Tenta extrair o ícone do arquivo
+                icon = IconExtractor.ExtractIconToBitmapSource(ExecutablePath);
+                 // Para arquivos, se falhar, o XAML cuida do placeholder
+                 if (icon == null)
+                 {
+                      Debug.WriteLine($"Ícone não encontrado para arquivo '{Name}' ({ExecutablePath})");
+                 }
+            }
+            // Se o item não existir, mantém o ícone atual ou usa o placeholder do XAML
+
+            if (icon != null)
+            {
+                 IconSource = icon;
             }
         }
+    }
+    catch (Exception ex) // Capturar exceções específicas é melhor
+    {
+        Debug.WriteLine($"Erro ao carregar ícone para {ExecutablePath} ({ItemType}): {ex.Message}");
+        // O XAML cuida do fallback
+    }
+}
 
         // Método LaunchApp atualizado para tratar diferentes tipos
         private void LaunchApp()
