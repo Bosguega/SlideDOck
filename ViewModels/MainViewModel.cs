@@ -1,4 +1,5 @@
-﻿using SlideDock.Models;
+﻿// Arquivo: ViewModels\MainViewModel.cs
+using SlideDock.Models;
 using SlideDock.Commands;
 using SlideDock.Services;
 using System.ComponentModel;
@@ -6,6 +7,7 @@ using System.Windows.Input;
 using System.Windows;
 using System.Diagnostics;
 using System;
+using System.Linq; // Adicionado para possíveis usos futuros
 
 namespace SlideDock.ViewModels
 {
@@ -28,6 +30,7 @@ namespace SlideDock.ViewModels
             _fileInteractionService = new FileInteractionService();
             _dialogService = new DialogService();
 
+            // Passa os serviços injetados para o DockManagerViewModel
             DockManager = new DockManagerViewModel(this, _fileInteractionService, _dialogService);
 
             ToggleDockCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
@@ -66,7 +69,37 @@ namespace SlideDock.ViewModels
             try
             {
                 Debug.WriteLine("Salvando configuração...");
-                _configService.SaveMenuGroups(DockManager.MenuGroups, IsExpanded, DockPosition);
+                // Atualizado para usar o novo método SaveConfiguration que aceita o objeto completo
+                var config = new DockConfiguration
+                {
+                    IsExpanded = this.IsExpanded,
+                    DockPosition = this.DockPosition
+                };
+
+                foreach (var groupViewModel in DockManager.MenuGroups)
+                {
+                    var groupData = new MenuGroupData
+                    {
+                        Name = groupViewModel.Name,
+                        IsExpanded = groupViewModel.IsExpanded
+                    };
+
+                    foreach (var appIconViewModel in groupViewModel.AppIcons)
+                    {
+                        // Certifique-se de salvar o ItemType também
+                        groupData.AppIcons.Add(new AppIconData
+                        {
+                            Name = appIconViewModel.Name,
+                            ExecutablePath = appIconViewModel.ExecutablePath
+                            // ItemType será adicionado ao AppIconData na próxima etapa se necessário
+                            // ItemType = appIconViewModel.ItemType // Se AppIconData tiver essa propriedade
+                        });
+                    }
+
+                    config.MenuGroups.Add(groupData);
+                }
+
+                _configService.SaveConfiguration(config);
                 Debug.WriteLine($"Configuração salva com {DockManager.MenuGroups.Count} grupos");
             }
             catch (Exception ex)
@@ -75,6 +108,7 @@ namespace SlideDock.ViewModels
                 Debug.WriteLine($"StackTrace: {ex.StackTrace}");
             }
         }
+
 
         private void LoadConfiguration()
         {
@@ -106,11 +140,14 @@ namespace SlideDock.ViewModels
                         {
                             Name = appData.Name,
                             ExecutablePath = appData.ExecutablePath
+                            // ItemType será carregado se AppIconData tiver essa propriedade
+                            // ItemType = appData.ItemType // Se AppIconData tiver essa propriedade
                         };
                         group.AppIcons.Add(appIcon);
                     }
 
-                    var groupViewModel = new MenuGroupViewModel(group, this, _dialogService);
+                    // Passa os serviços injetados para o MenuGroupViewModel
+                    var groupViewModel = new MenuGroupViewModel(group, this, _dialogService, _fileInteractionService);
                     DockManager.MenuGroups.Add(groupViewModel);
                     Debug.WriteLine($"Grupo '{groupData.Name}' adicionado com {groupViewModel.AppIcons.Count} aplicativos");
                 }
@@ -121,6 +158,7 @@ namespace SlideDock.ViewModels
                 Debug.WriteLine($"StackTrace: {ex.StackTrace}");
             }
         }
+
         private void CloseApplication()
         {
             Application.Current.Shutdown();

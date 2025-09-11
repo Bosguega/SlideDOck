@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿// Arquivo: Services\DialogService.cs
+using System.Windows;
 
 namespace SlideDock.Services
 {
@@ -12,8 +13,17 @@ namespace SlideDock.Services
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question,
                 MessageBoxResult.No);
-
             return result == MessageBoxResult.Yes;
+        }
+
+        // Nova implementação
+        public void ShowMessage(string message, string title)
+        {
+            MessageBox.Show(
+                message,
+                title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Information); // Ou outro tipo de ícone apropriado
         }
     }
 }

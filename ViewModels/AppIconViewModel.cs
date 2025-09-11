@@ -1,4 +1,5 @@
-﻿using SlideDock.Models;
+﻿// Arquivo: ViewModels\AppIconViewModel.cs
+using SlideDock.Models; // Para DockItemType
 using SlideDock.Commands;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -7,41 +8,40 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using SlideDock.Utils;
 using System;
-using System.Windows; // Adicionado para MessageBox (opcional, se não usar IDialogService para tudo)
-using SlideDock.Services; // Adicionado para IDialogService
+using System.Windows; // Para MessageBox (fallback)
+using SlideDock.Services; // Para IDialogService
 
 namespace SlideDock.ViewModels
 {
     public class AppIconViewModel : INotifyPropertyChanged
     {
         private readonly AppIcon _model;
-        // 1. Adicionar campo para o serviço
+        // Campo para o serviço injetado
         private readonly IDialogService _dialogService;
 
         public ICommand LaunchAppCommand { get; }
         public ICommand RemoveAppCommand { get; }
-        public ICommand OpenFolderCommand { get; }
+        public ICommand OpenFolderCommand { get; } // Agora serve para "Abrir Local"
 
         public event EventHandler RemoveRequested;
-        public event EventHandler OpenFolderRequested;
+        public event EventHandler OpenFolderRequested; // Agora serve para "Abrir Local"
 
-        // 2. Modificar o construtor para aceitar IDialogService
-        public AppIconViewModel(AppIcon model, IDialogService dialogService) // <-- Modificação aqui
+        /// <summary>
+        /// Construtor que recebe o modelo e o serviço de diálogo.
+        /// </summary>
+        /// <param name="model">O modelo de dados AppIcon.</param>
+        /// <param name="dialogService">Serviço para exibir diálogos.</param>
+        public AppIconViewModel(AppIcon model, IDialogService dialogService)
         {
             _model = model ?? throw new ArgumentNullException(nameof(model));
-            // 3. Atribuir o serviço injetado
+            // Atribui o serviço injetado
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
 
             LaunchAppCommand = new RelayCommand(_ => LaunchApp());
             RemoveAppCommand = new RelayCommand(_ => OnRemoveRequested());
-            OpenFolderCommand = new RelayCommand(_ => OnOpenFolderRequested());
+            OpenFolderCommand = new RelayCommand(_ => OnOpenFolderRequested()); // Agora "Abrir Local"
             LoadIcon();
         }
-
-        // Construtor existente pode ser mantido para compatibilidade (opcional, mas requer ajuste na criação)
-        // Se mantido, ele deve chamar o novo construtor ou garantir que _dialogService seja inicializado.
-        // Por simplicidade e clareza, vamos assumir que o novo construtor será usado.
-        // public AppIconViewModel(AppIcon model) : this(model, ???) { } // Como obter o IDialogService aqui? Melhor injetar no local de criação.
 
         public string Name
         {
@@ -73,76 +73,160 @@ namespace SlideDock.ViewModels
             }
         }
 
+        // Propriedade para acessar o tipo do item
+        public DockItemType ItemType
+        {
+            get => _model.ItemType;
+            set
+            {
+                _model.ItemType = value;
+                OnPropertyChanged();
+            }
+        }
+
         private void LoadIcon()
         {
             try
             {
-                if (!string.IsNullOrEmpty(ExecutablePath) && File.Exists(ExecutablePath))
+                // Verificação de caminho não vazio
+                if (!string.IsNullOrEmpty(ExecutablePath))
                 {
-                    IconSource = IconExtractor.ExtractIconToBitmapSource(ExecutablePath);
+                    BitmapSource icon = null;
+
+                    // Verifica se o item (arquivo ou pasta) existe antes de tentar carregar o ícone
+                    if (ItemType == DockItemType.Folder && Directory.Exists(ExecutablePath))
+                    {
+                        // Tenta extrair o ícone da pasta
+                        icon = IconExtractor.ExtractIconToBitmapSource(ExecutablePath);
+                        // Se falhar, usa o ícone padrão para pastas
+                        if (icon == null)
+                        {
+                            icon = IconExtractor.DefaultFolderIcon;
+                            Debug.WriteLine($"Usando ícone padrão para pasta '{Name}' ({ExecutablePath})");
+                        }
+                    }
+                    else if ((ItemType == DockItemType.Application || ItemType == DockItemType.File) && File.Exists(ExecutablePath))
+                    {
+                        // Tenta extrair o ícone do arquivo
+                        icon = IconExtractor.ExtractIconToBitmapSource(ExecutablePath);
+                        // Para arquivos, se falhar, o XAML cuida do placeholder
+                        if (icon == null)
+                        {
+                            Debug.WriteLine($"Ícone não encontrado para arquivo '{Name}' ({ExecutablePath})");
+                        }
+                    }
+                    // Se o item não existir, mantém o ícone atual ou usa o placeholder do XAML
+
+                    if (icon != null)
+                    {
+                        IconSource = icon;
+                    }
                 }
             }
             catch (Exception ex) // Capturar exceções específicas é melhor
             {
-                Debug.WriteLine($"Erro ao carregar ícone para {ExecutablePath}: {ex.Message}");
+                Debug.WriteLine($"Erro ao carregar ícone para {ExecutablePath} ({ItemType}): {ex.Message}");
                 // O XAML cuida do fallback
             }
         }
 
+        // Método LaunchApp atualizado para tratar diferentes tipos
         private void LaunchApp()
         {
             // Verifica se o caminho está preenchido
             if (string.IsNullOrEmpty(ExecutablePath))
             {
-                // Opcional: usar IDialogService ou MessageBox diretamente
-                MessageBox.Show("Caminho do aplicativo não configurado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
-                // Ou _dialogService.ShowMessage("Caminho do aplicativo não configurado.", "Erro"); // se tiver um método ShowMessage
+                // Usar IDialogService se disponível
+                _dialogService?.ShowMessage("Caminho do item não configurado.", "Erro");
                 return;
             }
 
-            // Verifica se o arquivo existe
-            if (File.Exists(ExecutablePath))
+            try
             {
-                try
+                if (ItemType == DockItemType.Folder)
                 {
-                    Process.Start(new ProcessStartInfo
+                    // --- Lógica para Pasta ---
+                    if (Directory.Exists(ExecutablePath))
                     {
-                        FileName = ExecutablePath,
-                        UseShellExecute = true
-                    });
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = ExecutablePath,
+                            UseShellExecute = true
+                        });
+                    }
+                    else
+                    {
+                        // Pasta não encontrada - usar a lógica existente de confirmação
+                        HandleItemNotFound("pasta");
+                    }
                 }
-                catch (Exception ex)
+                else if (ItemType == DockItemType.Application)
                 {
-                    // Opcional: usar IDialogService
-                    MessageBox.Show($"Erro ao abrir aplicativo: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                    // Ou _dialogService.ShowMessage($"Erro ao abrir aplicativo: {ex.Message}", "Erro");
+                    // --- Lógica para Aplicativo (.exe) ---
+                    if (File.Exists(ExecutablePath))
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = ExecutablePath,
+                            UseShellExecute = true
+                        });
+                    }
+                    else
+                    {
+                        // App não encontrado - usar a lógica existente de confirmação
+                        HandleItemNotFound("aplicativo");
+                    }
+                }
+                else // ItemType.File ou outros tipos genéricos de arquivo
+                {
+                    // --- Lógica para Arquivo Genérico ---
+                    if (File.Exists(ExecutablePath))
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = ExecutablePath,
+                            UseShellExecute = true
+                        });
+                    }
+                    else
+                    {
+                        HandleItemNotFound("arquivo");
+                    }
                 }
             }
-            else
+            catch (Exception ex)
             {
-                // --- Arquivo NÃO encontrado - Implementação da Melhoria ---
-                string message = $"O arquivo '{Name}' não foi encontrado no caminho:\n{ExecutablePath}\n\nEle pode ter sido movido ou excluído. Deseja removê-lo do SlideDock?";
-                string title = "Arquivo Não Encontrado";
-
-                // Usando o IDialogService injetado
-                bool shouldRemove = _dialogService.ShowConfirmationDialog(message, title);
-
-                if (shouldRemove)
-                {
-                    OnRemoveRequested(); // Dispara o evento para remover este ícone
-                }
+                // Usar IDialogService se disponível
+                _dialogService?.ShowMessage($"Erro ao abrir o item: {ex.Message}", "Erro");
+                // Ou MessageBox.Show($"Erro ao abrir o item: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
+        // Método auxiliar para lidar com itens não encontrados
+        private void HandleItemNotFound(string itemTypeLabel)
+        {
+            string message = $"O {itemTypeLabel} '{Name}' não foi encontrado no caminho:\n{ExecutablePath}\n\nEle pode ter sido movido ou excluído. Deseja removê-lo do SlideDock?";
+            string title = $"{itemTypeLabel} Não Encontrado";
+
+            // Usa o serviço de diálogo injetado
+            bool shouldRemove = _dialogService?.ShowConfirmationDialog(message, title) ?? false; // Segurança contra null
+
+            if (shouldRemove)
+            {
+                OnRemoveRequested();
+            }
+        }
+
+        // Método OnOpenFolderRequested renomeado conceitualmente para "Abrir Local"
+        // Mas o nome do método e do evento permanecem os mesmos para compatibilidade
+        private void OnOpenFolderRequested()
+        {
+            OpenFolderRequested?.Invoke(this, EventArgs.Empty);
+        }
 
         private void OnRemoveRequested()
         {
             RemoveRequested?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void OnOpenFolderRequested()
-        {
-            OpenFolderRequested?.Invoke(this, EventArgs.Empty);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

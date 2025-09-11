@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿// Arquivo: Services\IDialogService.cs
+using System.Windows;
 
 namespace SlideDock.Services
 {
@@ -11,5 +12,13 @@ namespace SlideDock.Services
         /// <param name="title">Título da janela</param>
         /// <returns>True se o usuário confirmar, False caso contrário</returns>
         bool ShowConfirmationDialog(string message, string title);
+
+        // Novo método
+        /// <summary>
+        /// Exibe uma mensagem simples
+        /// </summary>
+        /// <param name="message">Mensagem a ser exibida</param>
+        /// <param name="title">Título da janela</param>
+        void ShowMessage(string message, string title);
     }
 }

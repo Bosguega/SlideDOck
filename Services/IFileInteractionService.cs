@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿// Arquivo: Services\IFileInteractionService.cs
+// Adicionar using para qualificar os tipos
+using System.Windows; // Para DragEventArgs e DataFormats WPF
 
 namespace SlideDock.Services
 {
@@ -15,6 +17,7 @@ namespace SlideDock.Services
         /// </summary>
         /// <param name="e">Argumentos do evento de drag</param>
         /// <returns>Array de caminhos de arquivos .exe</returns>
+        // Qualificar DragEventArgs
         string[] GetDroppedExecutableFiles(DragEventArgs e);
 
         /// <summary>
@@ -22,6 +25,14 @@ namespace SlideDock.Services
         /// </summary>
         /// <param name="e">Argumentos do evento de drag</param>
         /// <returns>Array de caminhos de arquivos</returns>
+        // Qualificar DragEventArgs
         string[] GetDroppedFiles(DragEventArgs e);
+
+        // Novo método
+        /// <summary>
+        /// Abre um diálogo para selecionar uma pasta.
+        /// </summary>
+        /// <returns>Caminho da pasta selecionada ou null se cancelado</returns>
+        string SelectFolder();
     }
 }

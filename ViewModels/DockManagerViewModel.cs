@@ -1,4 +1,5 @@
-﻿using SlideDock.Models;
+﻿// Arquivo: ViewModels\DockManagerViewModel.cs
+using SlideDock.Models;
 using SlideDock.Commands;
 using SlideDock.Services;
 using System.Collections.ObjectModel;
@@ -7,12 +8,14 @@ using System.Windows.Input;
 using System.Windows;
 using System.Diagnostics;
 using System.IO;
+using System.Linq; // Adicionado para FirstOrDefault
 
 namespace SlideDock.ViewModels
 {
     public class DockManagerViewModel : INotifyPropertyChanged
     {
         private readonly MainViewModel _mainViewModel;
+        // Serviço já injetado
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IDialogService _dialogService;
 
@@ -28,6 +31,7 @@ namespace SlideDock.ViewModels
                                    IDialogService dialogService)
         {
             _mainViewModel = mainViewModel;
+            // Atribuir os serviços injetados
             _fileInteractionService = fileInteractionService;
             _dialogService = dialogService;
 
@@ -40,16 +44,18 @@ namespace SlideDock.ViewModels
         private void AddNewMenuGroup()
         {
             var newGroup = new MenuGroup { Name = "Novo Grupo", IsExpanded = true };
-            var viewModel = new MenuGroupViewModel(newGroup, _mainViewModel, _dialogService);
+            // Passar os serviços injetados para o novo MenuGroupViewModel
+            var viewModel = new MenuGroupViewModel(newGroup, _mainViewModel, _dialogService, _fileInteractionService);
             MenuGroups.Add(viewModel);
             Debug.WriteLine("Novo grupo adicionado");
             _mainViewModel.SaveConfiguration();
         }
+
         public void RemoveMenuGroup(MenuGroupViewModel group)
         {
             if (group != null && MenuGroups.Contains(group))
             {
-                string message = $"Deseja remover o grupo '{group.Name}' e todos os seus aplicativos?";
+                string message = $"Deseja remover o grupo '{group.Name}' e todos os seus itens?";
                 string title = "Confirmar Remoção";
 
                 if (_dialogService.ShowConfirmationDialog(message, title))
@@ -60,6 +66,7 @@ namespace SlideDock.ViewModels
                 }
             }
         }
+
         private void AddAppFromDialog()
         {
             if (MenuGroups.Count == 0)
@@ -68,6 +75,7 @@ namespace SlideDock.ViewModels
                 return;
             }
 
+            // Usa o serviço injetado para selecionar o arquivo
             string filePath = _fileInteractionService.SelectExecutableFile();
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -79,19 +87,18 @@ namespace SlideDock.ViewModels
         {
             if (MenuGroups.Count > 0)
             {
-                var appIcon = new AppIcon
-                {
-                    Name = Path.GetFileNameWithoutExtension(filePath),
-                    ExecutablePath = filePath
-                };
-                MenuGroups[0].AddAppIcon(filePath);
-                Debug.WriteLine($"App adicionado ao grupo: {appIcon.Name}");
+                // Delega a adição para o primeiro grupo (ou outro critério)
+                MenuGroups[0].AddAppIcon(filePath); // AddAppIcon agora trata tipos
+                Debug.WriteLine($"Item adicionado ao grupo via diálogo: {Path.GetFileName(filePath)}");
                 _mainViewModel.SaveConfiguration();
             }
         }
 
+        // Método chamado ao arrastar arquivos/pastas para a janela principal
         public void AddAppFromFile(string filePath)
         {
+            // Este método agora simplesmente chama AddAppIcon no primeiro grupo,
+            // que cuida da lógica de determinar o tipo (arquivo/pasta).
             if (MenuGroups.Count == 0)
             {
                 AddNewMenuGroup();
@@ -99,17 +106,15 @@ namespace SlideDock.ViewModels
 
             if (MenuGroups.Count > 0)
             {
-                var appIcon = new AppIcon
-                {
-                    Name = Path.GetFileNameWithoutExtension(filePath),
-                    ExecutablePath = filePath
-                };
-                MenuGroups[0].AddAppIcon(filePath);
-                Debug.WriteLine($"App adicionado via arquivo: {appIcon.Name}");
+                // Em vez de criar AppIcon aqui, delegamos para o MenuGroupViewModel
+                // que possui a lógica atualizada para determinar ItemType.
+                MenuGroups[0].AddAppIcon(filePath); // Este método agora determina o tipo
+                Debug.WriteLine($"Item adicionado via arquivo/drag: {Path.GetFileName(filePath)}");
                 _mainViewModel.SaveConfiguration();
             }
         }
 
+        // Método para mover ícones entre grupos via drag & drop
         public void MoveAppIconBetweenGroups(AppIconViewModel appIcon, MenuGroupViewModel sourceGroup, MenuGroupViewModel targetGroup)
         {
             if (appIcon == null || sourceGroup == null || targetGroup == null || sourceGroup == targetGroup) return;
@@ -120,6 +125,7 @@ namespace SlideDock.ViewModels
             sourceGroup.RemoveAppIcon(appIcon);
 
             // Adiciona ao grupo de destino
+            // Passa o caminho do executável e deixa o AddAppIcon do targetGroup cuidar do tipo
             targetGroup.AddAppIcon(appIcon.ExecutablePath); // Usamos o método que aceita filePath
 
             _mainViewModel.SaveConfiguration();

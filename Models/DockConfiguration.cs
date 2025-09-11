@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SlideDock.Models;
 
 namespace SlideDock.Models
 {
@@ -20,5 +21,7 @@ namespace SlideDock.Models
     {
         public string Name { get; set; }
         public string ExecutablePath { get; set; }
+        // Nova propriedade para persistência
+        public DockItemType ItemType { get; set; } = DockItemType.File; // Valor padrão para compatibilidade com configs antigas
     }
 }

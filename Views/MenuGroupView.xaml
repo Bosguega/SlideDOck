@@ -40,29 +40,42 @@
                     HorizontalAlignment="Right"            
                     Margin="0,0,5,0">
 
-                        <!-- Botão Adicionar App (usei outro ícone Free: fa-plus-circle) -->
                         <Button Style="{StaticResource IconButtonStyle}"
                     Command="{Binding AddAppCommand}"
-                    ToolTip="Adicionar App a este grupo">
+                            ToolTip="Adicionar Arquivo a este grupo" >
+                            <!-- Tooltip atualizado -->
                             <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
-                    Text="&#xf0fe;"
-                    Foreground="LightBlue"
-                    FontSize="14"
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Center"/>
-                        </Button>
+                           Text="&#xf0fe;" 
+                           Foreground="LightBlue"
+                           FontSize="14"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"/>
+            </Button>
+
+                        <!-- Botão Adicionar Pasta -->
+                        <Button Style="{StaticResource IconButtonStyle}" 
+                            Command="{Binding AddFolderCommand}"
+                          
+                            ToolTip="Adicionar Pasta a este grupo" >
+                            <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
+                           Text="&#xf07b;"
+                           Foreground="LightGreen" 
+                           FontSize="14"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"/>
+            </Button>
 
                         <!-- Botão Remover Grupo -->
                         <Button Style="{StaticResource RemoveButtonStyle}"
                     Command="{Binding RemoveGroupCommand}"
-                    ToolTip="Remover Grupo">
+                    ToolTip="Remover Grupo" >
                             <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
-                    Text="&#xf1f8;"
-                    Foreground="OrangeRed"
-                    FontSize="14"
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Center"/>
-                        </Button>
+                           Text="&#xf1f8;" 
+                           Foreground="OrangeRed"
+                           FontSize="14"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"/>
+            </Button>
                     </StackPanel>
                 </Grid>
             </Expander.Header>
