@@ -51,7 +51,7 @@ namespace SlideDock.ViewModels
             _mainViewModel.SaveConfiguration();
         }
 
-        public void RemoveMenuGroup(MenuGroupViewModel group)
+        public void RemoveMenuGroup(MenuGroupViewModel? group)
         {
             if (group != null && MenuGroups.Contains(group))
             {
@@ -83,22 +83,19 @@ namespace SlideDock.ViewModels
             }
         }
 
-        private void AddAppToSelectedGroup(string filePath)
+        private async void AddAppToSelectedGroup(string filePath)
         {
             if (MenuGroups.Count > 0)
             {
-                // Delega a adição para o primeiro grupo (ou outro critério)
-                MenuGroups[0].AddAppIcon(filePath); // AddAppIcon agora trata tipos
+                await MenuGroups[0].AddAppIconAsync(filePath); // Corrigido para usar o método assíncrono
                 Debug.WriteLine($"Item adicionado ao grupo via diálogo: {Path.GetFileName(filePath)}");
                 _mainViewModel.SaveConfiguration();
             }
         }
 
         // Método chamado ao arrastar arquivos/pastas para a janela principal
-        public void AddAppFromFile(string filePath)
+        public async void AddAppFromFile(string filePath)
         {
-            // Este método agora simplesmente chama AddAppIcon no primeiro grupo,
-            // que cuida da lógica de determinar o tipo (arquivo/pasta).
             if (MenuGroups.Count == 0)
             {
                 AddNewMenuGroup();
@@ -106,27 +103,22 @@ namespace SlideDock.ViewModels
 
             if (MenuGroups.Count > 0)
             {
-                // Em vez de criar AppIcon aqui, delegamos para o MenuGroupViewModel
-                // que possui a lógica atualizada para determinar ItemType.
-                MenuGroups[0].AddAppIcon(filePath); // Este método agora determina o tipo
+                await MenuGroups[0].AddAppIconAsync(filePath); // Corrigido para usar o método assíncrono
                 Debug.WriteLine($"Item adicionado via arquivo/drag: {Path.GetFileName(filePath)}");
                 _mainViewModel.SaveConfiguration();
             }
         }
 
         // Método para mover ícones entre grupos via drag & drop
-        public void MoveAppIconBetweenGroups(AppIconViewModel appIcon, MenuGroupViewModel sourceGroup, MenuGroupViewModel targetGroup)
+        public async void MoveAppIconBetweenGroups(AppIconViewModel appIcon, MenuGroupViewModel sourceGroup, MenuGroupViewModel targetGroup)
         {
             if (appIcon == null || sourceGroup == null || targetGroup == null || sourceGroup == targetGroup) return;
 
             Debug.WriteLine($"Movendo App '{appIcon.Name}' de '{sourceGroup.Name}' para '{targetGroup.Name}'");
 
-            // Remove do grupo de origem
             sourceGroup.RemoveAppIcon(appIcon);
 
-            // Adiciona ao grupo de destino
-            // Passa o caminho do executável e deixa o AddAppIcon do targetGroup cuidar do tipo
-            targetGroup.AddAppIcon(appIcon.ExecutablePath); // Usamos o método que aceita filePath
+            await targetGroup.AddAppIconAsync(appIcon.ExecutablePath); // Corrigido para usar o método assíncrono
 
             _mainViewModel.SaveConfiguration();
         }

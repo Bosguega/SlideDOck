@@ -8,8 +8,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
-using System.Collections.Specialized;
 using System.Windows.Input;
 
 namespace SlideDock.ViewModels
@@ -22,7 +22,7 @@ namespace SlideDock.ViewModels
         private readonly IFileInteractionService _fileInteractionService;
         private IDragDropUIService? _dragDropUIService;
 
-        public ObservableCollection<AppIconViewModel> AppIcons { get; } = [];
+        public ObservableCollection<AppIconViewModel> AppIcons { get; } = new();
 
         public ICommand ToggleExpandCommand { get; }
         public ICommand AddAppCommand { get; }
@@ -40,17 +40,18 @@ namespace SlideDock.ViewModels
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _fileInteractionService = fileInteractionService ?? throw new ArgumentNullException(nameof(fileInteractionService));
-            // _dragDropUIService = dragDropUIService ?? throw new ArgumentNullException(nameof(dragDropUIService)); // Removed from constructor
 
             ToggleExpandCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
-            AddAppCommand = new RelayCommand(_ => AddAppFromFileDialog());
+            AddAppCommand = new AsyncRelayCommand(AddAppFromFileDialogAsync);
             RemoveGroupCommand = new RelayCommand(_ => _mainViewModel.DockManager.RemoveMenuGroup(this));
-            AddFolderCommand = new RelayCommand(_ => AddFolderFromDialog());
+            AddFolderCommand = new AsyncRelayCommand(AddFolderFromDialogAsync);
             DropCommand = new RelayCommand(OnDrop);
             DragOverCommand = new RelayCommand(OnDragOver);
 
             SyncAppIconsFromModel();
         }
+
+        #region Properties
 
         public string Name
         {
@@ -72,145 +73,159 @@ namespace SlideDock.ViewModels
             }
         }
 
-        #region Adição de itens
+        #endregion
 
-        public void AddAppIcon(string filePath)
+        #region Initialization
+
+        private void SyncAppIconsFromModel()
+        {
+            foreach (var vm in AppIcons)
+            {
+                vm.RemoveRequested -= (s, e) => RemoveApp(vm);
+                vm.OpenFolderRequested -= async (s, e) => await OpenAppFolderAsync(vm);
+            }
+
+            AppIcons.Clear();
+
+            foreach (var appIcon in _model.AppIcons)
+            {
+                var vm = new AppIconViewModel(appIcon, _dialogService, this);
+                vm.RemoveRequested += (s, e) => RemoveApp(vm);
+                vm.OpenFolderRequested += async (s, e) => await OpenAppFolderAsync(vm);
+                AppIcons.Add(vm);
+            }
+        }
+
+        #endregion
+
+        #region Add / Remove Items
+
+        public async Task AddAppIconAsync(string filePath)
         {
             if (string.IsNullOrEmpty(filePath)) return;
 
-            DockItemType itemType;
-            string itemName;
+            DockItemType type;
+            string name;
 
             if (Directory.Exists(filePath))
             {
-                itemType = DockItemType.Folder;
-                itemName = Path.GetFileName(filePath);
-            }
-            else if (File.Exists(filePath))
-            {
-                string extension = Path.GetExtension(filePath).ToLowerInvariant();
-                itemType = extension == ".exe" ? DockItemType.Application : DockItemType.File;
-                itemName = Path.GetFileNameWithoutExtension(filePath);
+                type = DockItemType.Folder;
+                name = Path.GetFileName(filePath);
             }
             else
             {
-                itemType = DockItemType.File;
-                itemName = Path.GetFileNameWithoutExtension(filePath);
+                type = Path.GetExtension(filePath).ToLowerInvariant() == ".exe"
+                    ? DockItemType.Application
+                    : DockItemType.File;
+                name = Path.GetFileNameWithoutExtension(filePath);
             }
 
             var appIcon = new AppIcon
             {
-                Name = itemName,
+                Name = name,
                 ExecutablePath = filePath,
-                ItemType = itemType
+                ItemType = type
             };
 
             _model.AppIcons.Add(appIcon);
 
-            var appIconViewModel = new AppIconViewModel(appIcon, _dialogService, this);
-            appIconViewModel.RemoveRequested += (s, e) => RemoveApp(appIconViewModel);
-            appIconViewModel.OpenFolderRequested += (s, e) => OpenAppFolder(appIconViewModel);
-            AppIcons.Add(appIconViewModel);
+            var vm = new AppIconViewModel(appIcon, _dialogService, this);
+            vm.RemoveRequested += (s, e) => RemoveApp(vm);
+            vm.OpenFolderRequested += async (s, e) => await OpenAppFolderAsync(vm);
+            AppIcons.Add(vm);
 
             _mainViewModel.SaveConfiguration();
         }
 
-        private void AddAppFromFileDialog()
+        private async Task AddAppFromFileDialogAsync()
         {
-            var openFileDialog = new OpenFileDialog
+            var dialog = new OpenFileDialog
             {
                 Filter = "Todos os arquivos (*.*)|*.*",
                 Title = "Selecione um arquivo"
             };
 
-            if (openFileDialog.ShowDialog() == true)
-                AddAppIcon(openFileDialog.FileName);
+            if (dialog.ShowDialog() == true)
+                await AddAppIconAsync(dialog.FileName);
         }
 
-        private void AddFolderFromDialog()
+        private async Task AddFolderFromDialogAsync()
         {
-            string? folderPath = _fileInteractionService?.SelectFolder();
-            if (!string.IsNullOrEmpty(folderPath))
-                AddAppIcon(folderPath);
+            string? folder = _fileInteractionService.SelectFolder();
+            if (!string.IsNullOrEmpty(folder))
+                await AddAppIconAsync(folder);
         }
 
-        #endregion
-
-        #region Remoção de itens
-
-        public void RemoveApp(AppIconViewModel appViewModel)
+        public void RemoveApp(AppIconViewModel vm)
         {
-            if (appViewModel == null || !AppIcons.Contains(appViewModel)) return;
+            if (vm == null || !AppIcons.Contains(vm)) return;
 
             if (_dialogService.ShowConfirmationDialog(
-                $"Deseja remover o item '{appViewModel.Name}'?",
+                $"Deseja remover o item '{vm.Name}'?",
                 "Confirmar Remoção"))
             {
-                RemoveAppIcon(appViewModel);
+                RemoveAppIcon(vm);
             }
         }
 
-        public void RemoveAppIcon(AppIconViewModel appViewModel)
+        public void RemoveAppIcon(AppIconViewModel vm)
         {
-            if (appViewModel == null) return;
+            if (vm == null) return;
 
-            AppIcons.Remove(appViewModel);
+            AppIcons.Remove(vm);
 
-            var modelToRemove = _model.AppIcons.FirstOrDefault(a => a.ExecutablePath == appViewModel.ExecutablePath);
-            if (modelToRemove != null)
-                _model.AppIcons.Remove(modelToRemove);
+            var modelItem = _model.AppIcons.FirstOrDefault(a => a.ExecutablePath == vm.ExecutablePath);
+            if (modelItem != null)
+                _model.AppIcons.Remove(modelItem);
 
             _mainViewModel.SaveConfiguration();
         }
 
         #endregion
 
-        #region Ações nos itens
+        #region Item Actions
 
-        private void OpenAppFolder(AppIconViewModel appViewModel)
+        public async Task OpenAppFolderAsync(AppIconViewModel vm)
         {
-            if (appViewModel == null || string.IsNullOrEmpty(appViewModel.ExecutablePath))
-                return;
+            if (vm == null || string.IsNullOrEmpty(vm.ExecutablePath)) return;
 
-            try
+            await Task.Run(() =>
             {
-                string? pathToOpen = null;
-
-                if (appViewModel.ItemType == DockItemType.Folder && Directory.Exists(appViewModel.ExecutablePath))
-                    pathToOpen = appViewModel.ExecutablePath;
-                else if ((appViewModel.ItemType == DockItemType.Application || appViewModel.ItemType == DockItemType.File) &&
-                         File.Exists(appViewModel.ExecutablePath))
-                    pathToOpen = Path.GetDirectoryName(appViewModel.ExecutablePath);
-
-                if (!string.IsNullOrEmpty(pathToOpen))
+                try
                 {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = pathToOpen,
-                        UseShellExecute = true
-                    });
+                    string? path = null;
+                    if (vm.ItemType == DockItemType.Folder && Directory.Exists(vm.ExecutablePath))
+                        path = vm.ExecutablePath;
+                    else if ((vm.ItemType == DockItemType.Application || vm.ItemType == DockItemType.File) &&
+                             File.Exists(vm.ExecutablePath))
+                        path = Path.GetDirectoryName(vm.ExecutablePath);
+
+                    if (!string.IsNullOrEmpty(path))
+                        Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao abrir local: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+                catch (Exception ex)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                        MessageBox.Show($"Erro ao abrir a pasta: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error));
+                }
+            });
         }
 
         #endregion
 
-        #region Reordenação
+        #region Reorder
 
-        public void ReorderAppIcon(AppIconViewModel appIcon, int newIndex)
+        public void ReorderAppIcon(AppIconViewModel vm, int newIndex)
         {
-            if (appIcon == null || !AppIcons.Contains(appIcon)) return;
+            if (vm == null || !AppIcons.Contains(vm)) return;
 
-            int currentIndex = AppIcons.IndexOf(appIcon);
+            int currentIndex = AppIcons.IndexOf(vm);
             if (currentIndex == newIndex) return;
 
-            newIndex = Math.Max(0, Math.Min(newIndex, AppIcons.Count - 1));
+            newIndex = Math.Clamp(newIndex, 0, AppIcons.Count - 1);
+
             AppIcons.RemoveAt(currentIndex);
-            AppIcons.Insert(newIndex, appIcon);
+            AppIcons.Insert(newIndex, vm);
 
             SyncModelFromViewModel();
             _mainViewModel.SaveConfiguration();
@@ -219,58 +234,30 @@ namespace SlideDock.ViewModels
         private void SyncModelFromViewModel()
         {
             _model.AppIcons.Clear();
-            foreach (var appIconViewModel in AppIcons)
+            foreach (var vm in AppIcons)
             {
                 _model.AppIcons.Add(new AppIcon
                 {
-                    Name = appIconViewModel.Name,
-                    ExecutablePath = appIconViewModel.ExecutablePath,
-                    ItemType = appIconViewModel.ItemType
+                    Name = vm.Name,
+                    ExecutablePath = vm.ExecutablePath,
+                    ItemType = vm.ItemType
                 });
             }
         }
 
         #endregion
 
-        #region Inicialização
-
-        private void SyncAppIconsFromModel()
-        {
-            AppIcons.Clear();
-            foreach (var appIcon in _model.AppIcons)
-            {
-                var appIconViewModel = new AppIconViewModel(appIcon, _dialogService, this);
-                appIconViewModel.RemoveRequested += (s, e) => RemoveApp(appIconViewModel);
-                appIconViewModel.OpenFolderRequested += (s, e) => OpenAppFolder(appIconViewModel);
-                AppIcons.Add(appIconViewModel);
-            }
-        }
-
-        #endregion
-
-        #region INotifyPropertyChanged
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        #endregion
-
-        #region Drag and Drop Commands
+        #region Drag & Drop
 
         private void OnDrop(object parameter)
         {
             if (parameter is not DragEventArgs e) return;
 
             if (e.Data.GetDataPresent("SlideDockAppIcon"))
-            {
                 HandleDragBetweenGroupsOrReorder(e);
-            }
             else if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                HandleExternalFileDrop(e);
-            }
+                HandleExternalFileDropAsync(e).ConfigureAwait(false);
+
             _dragDropUIService?.HideDropIndicator();
         }
 
@@ -280,13 +267,13 @@ namespace SlideDock.ViewModels
 
             if (e.Data.GetDataPresent("SlideDockAppIcon"))
             {
-                HandleDragOverAppIcon(e);
+                e.Effects = DragDropEffects.Move;
                 _dragDropUIService?.ShowDropIndicator(e, e.Source as DependencyObject);
             }
             else if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 HandleDragOverExternalFiles(e);
-                _dragDropUIService?.HideDropIndicator(); // No drop indicator for external files by default
+                _dragDropUIService?.HideDropIndicator();
             }
             else
             {
@@ -301,8 +288,8 @@ namespace SlideDock.ViewModels
 
             if (dragData.SourceGroup == this)
             {
-                int newIndex = _dragDropUIService?.GetDropIndex(e, this, e.Source as DependencyObject) ?? -1;
-                ReorderAppIcon(dragData.AppIcon, newIndex);
+                int index = _dragDropUIService?.GetDropIndex(e, this, e.Source as DependencyObject) ?? -1;
+                ReorderAppIcon(dragData.AppIcon, index);
             }
             else
             {
@@ -310,21 +297,10 @@ namespace SlideDock.ViewModels
             }
         }
 
-        private void HandleExternalFileDrop(DragEventArgs e)
+        private async Task HandleExternalFileDropAsync(DragEventArgs e)
         {
-            string[] files = _fileInteractionService.GetDroppedFiles(e);
-            foreach (string file in files)
-            {
-                AddAppIcon(file);
-            }
-        }
-
-        private void HandleDragOverAppIcon(DragEventArgs e)
-        {
-            if (e.Data.GetData("SlideDockAppIcon") is not AppIconDragData dragData) return;
-
-            e.Effects = dragData.SourceGroup == this ? DragDropEffects.Move : DragDropEffects.Move;
-            // if (dragData.SourceGroup == this) ShowDropIndicator(e.GetPosition(this)); // UI-specific, handled by View
+            foreach (string file in _fileInteractionService.GetDroppedFiles(e))
+                await AddAppIconAsync(file);
         }
 
         private void HandleDragOverExternalFiles(DragEventArgs e)
@@ -333,11 +309,20 @@ namespace SlideDock.ViewModels
             e.Effects = files.Length > 0 ? DragDropEffects.Copy : DragDropEffects.None;
         }
 
-        #endregion
-
         public void SetDragDropUIService(IDragDropUIService service)
         {
-            _dragDropUIService = service;
+            _dragDropUIService = service ?? throw new ArgumentNullException(nameof(service));
         }
+
+        #endregion
+
+        #region INotifyPropertyChanged
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        #endregion
     }
 }

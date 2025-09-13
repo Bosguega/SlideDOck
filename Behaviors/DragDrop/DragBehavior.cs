@@ -22,6 +22,7 @@ namespace SlideDock.Behaviors.DragDrop
             base.OnAttached();
             AssociatedObject.MouseMove += AssociatedObject_MouseMove;
             AssociatedObject.MouseLeftButtonDown += AssociatedObject_MouseLeftButtonDown;
+            AssociatedObject.MouseLeftButtonUp += AssociatedObject_MouseLeftButtonUp;
         }
 
         protected override void OnDetaching()
@@ -29,18 +30,21 @@ namespace SlideDock.Behaviors.DragDrop
             base.OnDetaching();
             AssociatedObject.MouseMove -= AssociatedObject_MouseMove;
             AssociatedObject.MouseLeftButtonDown -= AssociatedObject_MouseLeftButtonDown;
+            AssociatedObject.MouseLeftButtonUp -= AssociatedObject_MouseLeftButtonUp;
         }
 
         private Point _startPoint;
+        private bool _isDragging = false;
 
         private void AssociatedObject_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _startPoint = e.GetPosition(AssociatedObject);
+            _isDragging = false;
         }
 
         private void AssociatedObject_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (e.LeftButton == MouseButtonState.Pressed && !_isDragging)
             {
                 Point mousePos = e.GetPosition(AssociatedObject);
                 Vector diff = _startPoint - mousePos;
@@ -48,6 +52,7 @@ namespace SlideDock.Behaviors.DragDrop
                 if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
                     Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
                 {
+                    _isDragging = true;
                     if (Command != null && Command.CanExecute(null))
                     {
                         if (AssociatedObject is FrameworkElement fe)
@@ -63,11 +68,15 @@ namespace SlideDock.Behaviors.DragDrop
                         {
                             Command.Execute(new DragStartInfo { ViewModel = null, DragSource = null }); // Fallback
                         }
+                        e.Handled = true; // Mark the event as handled to prevent click from firing
                     }
-                    // We don't start the actual drag drop operation here, 
-                    // just trigger the command. The ViewModel will handle the DoDragDrop.
                 }
             }
+        }
+
+        private void AssociatedObject_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            _isDragging = false;
         }
     }
 }

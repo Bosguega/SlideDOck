@@ -20,6 +20,9 @@
         <b:Interaction.Behaviors>
             <dd:DragBehavior Command="{Binding DragCommand}" />
         </b:Interaction.Behaviors>
+        <Border.InputBindings>
+            <!--<MouseBinding MouseAction="LeftClick" Command="{Binding LaunchAppCommand}" />-->
+        </Border.InputBindings>
         <Border.Style>
             <Style TargetType="Border">
                 <!-- Enhanced hover effects with smooth transitions and subtle shadow -->
