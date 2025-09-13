@@ -11,7 +11,7 @@ namespace SlideDock.Utils
 {
     public static class IconExtractor
     {
-        private static BitmapSource _defaultFolderIcon;
+        private static BitmapSource? _defaultFolderIcon;
 
         public static BitmapSource DefaultFolderIcon
         {
@@ -21,11 +21,12 @@ namespace SlideDock.Utils
                 {
                     try
                     {
-                        _defaultFolderIcon = GetFolderIcon()?.ToBitmapSource();
+                        _defaultFolderIcon = GetFolderIcon()?.ToBitmapSource() ?? CreateEmptyBitmap();
                     }
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"Erro ao carregar ícone padrão de pasta: {ex.Message}");
+                        _defaultFolderIcon = CreateEmptyBitmap();
                     }
                 }
                 return _defaultFolderIcon;
@@ -34,8 +35,6 @@ namespace SlideDock.Utils
 
         public static BitmapSource ExtractIconToBitmapSource(string filePath)
         {
-            if (string.IsNullOrEmpty(filePath)) return null;
-
             try
             {
                 Icon? icon = null;
@@ -49,12 +48,12 @@ namespace SlideDock.Utils
                     icon = Icon.ExtractAssociatedIcon(filePath);
                 }
 
-                return icon?.ToBitmapSource();
+                return icon?.ToBitmapSource() ?? DefaultFolderIcon;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Erro ao extrair ícone de '{filePath}': {ex.Message}");
-                return null;
+                return DefaultFolderIcon;
             }
         }
 
@@ -62,10 +61,9 @@ namespace SlideDock.Utils
         {
             try
             {
-                Icon icon = Icon.ExtractAssociatedIcon(filePath);
-                if (icon == null) return null;
+                Icon? icon = Icon.ExtractAssociatedIcon(filePath) ?? GetFolderIcon();
+                using Bitmap bitmap = icon?.ToBitmap() ?? new Bitmap(32, 32);
 
-                using Bitmap bitmap = icon.ToBitmap();
                 Directory.CreateDirectory(outputPath);
                 string iconPath = Path.Combine(outputPath, $"{Path.GetFileNameWithoutExtension(filePath)}.png");
                 bitmap.Save(iconPath, System.Drawing.Imaging.ImageFormat.Png);
@@ -74,13 +72,13 @@ namespace SlideDock.Utils
             catch (Exception ex)
             {
                 Debug.WriteLine($"Erro ao salvar ícone em arquivo: {ex.Message}");
-                return null;
+                return string.Empty;
             }
         }
 
-        public static BitmapSource? ToBitmapSource(this Icon icon)
+        public static BitmapSource ToBitmapSource(this Icon? icon)
         {
-            if (icon == null) return null;
+            if (icon == null) return DefaultFolderIcon;
 
             using Bitmap bitmap = icon.ToBitmap();
             IntPtr hBitmap = bitmap.GetHbitmap();
@@ -98,12 +96,15 @@ namespace SlideDock.Utils
             }
         }
 
+        private static BitmapSource CreateEmptyBitmap()
+        {
+            return BitmapSource.Create(32, 32, 96, 96, System.Windows.Media.PixelFormats.Bgra32,
+                null, new byte[32 * 32 * 4], 32 * 4);
+        }
+
         [DllImport("gdi32.dll")]
         private static extern bool DeleteObject(IntPtr hObject);
 
-        // =============================
-        // Ícone padrão de pasta via Windows API
-        // =============================
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         private struct SHFILEINFO
         {
@@ -130,7 +131,7 @@ namespace SlideDock.Utils
         {
             SHFILEINFO shinfo = new();
             SHGetFileInfo("", FILE_ATTRIBUTE_DIRECTORY, ref shinfo, (uint)Marshal.SizeOf(shinfo), SHGFI_ICON | SHGFI_LARGEICON);
-            return shinfo.hIcon != IntPtr.Zero ? Icon.FromHandle(shinfo.hIcon) : null;
+            return shinfo.hIcon != IntPtr.Zero ? Icon.FromHandle(shinfo.hIcon) : new Icon(SystemIcons.Application, 32, 32);
         }
     }
 }

@@ -136,7 +136,7 @@ namespace SlideDock.Views
             return insertAfter ? Math.Min(closestIndex + 1, groupViewModel.AppIcons.Count) : closestIndex;
         }
 
-        private static T FindChild<T>(DependencyObject parent) where T : DependencyObject
+        private static T? FindChild<T>(DependencyObject parent) where T : DependencyObject
         {
             if (parent == null) return null;
 
