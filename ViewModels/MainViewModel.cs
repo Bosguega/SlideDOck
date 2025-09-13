@@ -5,6 +5,7 @@ using SlideDock.Services;
 using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System;
 using System.Linq; // Adicionado para possíveis usos futuros
@@ -23,6 +24,8 @@ namespace SlideDock.ViewModels
 
         public ICommand ToggleDockCommand { get; }
         public ICommand CloseApplicationCommand { get; }
+        public ICommand DropFilesCommand { get; }
+        public ICommand DragOverFilesCommand { get; }
 
         public MainViewModel()
         {
@@ -35,6 +38,8 @@ namespace SlideDock.ViewModels
 
             ToggleDockCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             CloseApplicationCommand = new RelayCommand(_ => CloseApplication());
+            DropFilesCommand = new RelayCommand(OnDropFiles);
+            DragOverFilesCommand = new RelayCommand(OnDragOverFiles);
             LoadConfiguration();
         }
 
@@ -168,5 +173,36 @@ namespace SlideDock.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        #region Drag and Drop Handlers
+
+        private void OnDropFiles(object? parameter)
+        {
+            if (parameter is DragEventArgs e)
+            {
+                string[] files = _fileInteractionService.GetDroppedFiles(e);
+                foreach (string file in files)
+                {
+                    AddAppFromFile(file);
+                }
+            }
+        }
+
+        private void OnDragOverFiles(object? parameter)
+        {
+            if (parameter is DragEventArgs e)
+            {
+                string[] files = _fileInteractionService.GetDroppedFiles(e);
+                e.Effects = files.Length > 0 ? DragDropEffects.Copy : DragDropEffects.None;
+                e.Handled = true;
+            }
+        }
+
+        private void AddAppFromFile(string filePath)
+        {
+            DockManager.AddAppFromFile(filePath);
+        }
+
+        #endregion
     }
 }

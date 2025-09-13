@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:viewmodels="clr-namespace:SlideDock.ViewModels"
              xmlns:local="clr-namespace:SlideDock.Views"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:dd="clr-namespace:SlideDock.Behaviors.DragDrop"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="280"
              DataContext="{Binding}">
@@ -84,10 +86,10 @@
                 BorderBrush="#FF3E3E42"
                 BorderThickness="1"
                 Width="250"
-                Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisibilityConverter}}"
-                Drop="MainWindow_Drop"
-                DragEnter="MainWindow_DragEnter"
-                AllowDrop="True">
+                Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisibilityConverter}}">
+            <b:Interaction.Behaviors>
+                <dd:DropBehavior DropCommand="{Binding DropFilesCommand}" DragOverCommand="{Binding DragOverFilesCommand}" />
+            </b:Interaction.Behaviors>
             <Border.Style>
                 <Style TargetType="Border">
                     <Style.Triggers>
