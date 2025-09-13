@@ -6,7 +6,7 @@ namespace SlideDock.Views
 {
     public partial class MainWindow : Window
     {
-        private MainViewModel _viewModel => DataContext as MainViewModel;
+        private MainViewModel ViewModel => DataContext as MainViewModel;
 
         public MainWindow()
         {
@@ -16,9 +16,9 @@ namespace SlideDock.Views
             SetInitialWindowPosition();
 
             // Se o DataContext já estiver definido (como em Design-time), ouça as mudanças.
-            if (_viewModel != null)
+            if (ViewModel != null)
             {
-                _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+                ViewModel.PropertyChanged += ViewModel_PropertyChanged;
             }
             // Caso contrário, aguarde o DataContext ser definido e então ouça as mudanças.
             else
@@ -35,7 +35,7 @@ namespace SlideDock.Views
             Height = SystemParameters.WorkArea.Height;
 
             // Define a posição inicial com base na DockPosition no ViewModel (se disponível)
-            if (_viewModel != null && _viewModel.DockPosition == Models.DockPosition.Right)
+            if (ViewModel != null && ViewModel.DockPosition == Models.DockPosition.Right)
             {
                 Left = SystemParameters.WorkArea.Width - Width;
             }
@@ -48,10 +48,10 @@ namespace SlideDock.Views
 
         private void MainWindow_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (_viewModel != null)
+            if (ViewModel != null)
             {
-                _viewModel.PropertyChanged -= ViewModel_PropertyChanged; // Evitar duplicação
-                _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+                ViewModel.PropertyChanged -= ViewModel_PropertyChanged; // Evitar duplicação
+                ViewModel.PropertyChanged += ViewModel_PropertyChanged;
                 SetInitialWindowPosition(); // Definir a posição assim que o DataContext estiver pronto
             }
         }
@@ -60,7 +60,7 @@ namespace SlideDock.Views
         {
             if (e.PropertyName == nameof(MainViewModel.DockPosition))
             {
-                if (_viewModel.DockPosition == Models.DockPosition.Right)
+                if (ViewModel.DockPosition == Models.DockPosition.Right)
                 {
                     Left = SystemParameters.WorkArea.Width - Width; // Mover para a direita
                 }
@@ -75,10 +75,7 @@ namespace SlideDock.Views
         {
             System.Diagnostics.Debug.WriteLine("Main window closing...");
             // Save configuration on close
-            if (_viewModel != null)
-            {
-                _viewModel.SaveConfiguration();
-            }
+            ViewModel?.SaveConfiguration();
         }
     }
 }

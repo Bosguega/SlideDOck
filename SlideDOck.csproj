@@ -8,6 +8,7 @@
   <Nullable>enable</Nullable>
   <AssemblyName>SlideDock</AssemblyName>
   <RootNamespace>SlideDock</RootNamespace>
+  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 </PropertyGroup>
 
 	<ItemGroup>

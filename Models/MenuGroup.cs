@@ -11,7 +11,7 @@ namespace SlideDock.Models
         public MenuGroup()
         {
             // Inicializa a coleção para evitar referências nulas
-            AppIcons = new ObservableCollection<AppIcon>();
+            AppIcons = [];
         }
 
         public string Name
@@ -36,8 +36,8 @@ namespace SlideDock.Models
 
         public ObservableCollection<AppIcon> AppIcons { get; set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

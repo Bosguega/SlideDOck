@@ -1,29 +1,28 @@
+using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows;
 using System.Windows.Media;
 using SlideDock.ViewModels;
-using System;
-using System.Diagnostics;
 
 namespace SlideDock.Views
 {
     public partial class AppIconView : UserControl
     {
         private Point _startPoint;
-        private bool _isDragging = false;
+        private bool _isDragging;
 
         public AppIconView()
         {
             InitializeComponent();
         }
 
+        #region Eventos do Mouse
+
         private void AppIcon_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _startPoint = e.GetPosition(null);
             _isDragging = false;
-            Debug.WriteLine($"AppIcon_PreviewMouseLeftButtonDown: _startPoint = {_startPoint}");
-
             ((FrameworkElement)sender).CaptureMouse();
         }
 
@@ -31,74 +30,46 @@ namespace SlideDock.Views
         {
             ((FrameworkElement)sender).ReleaseMouseCapture();
 
-            if (!_isDragging)
+            if (!_isDragging && this.DataContext is AppIconViewModel appIcon && appIcon.LaunchAppCommand?.CanExecute(null) == true)
             {
-                // Handle app launch click
-                if (this.DataContext is AppIconViewModel appIcon && appIcon.LaunchAppCommand?.CanExecute(null) == true)
-                {
-                    appIcon.LaunchAppCommand.Execute(null);
-                    Debug.WriteLine($"App launched: {appIcon.Name}");
-                }
+                appIcon.LaunchAppCommand.Execute(null);
             }
 
             _isDragging = false;
-            Debug.WriteLine("AppIcon_PreviewMouseLeftButtonUp: Mouse capture released");
         }
 
         private void AppIcon_MouseMove(object sender, MouseEventArgs e)
         {
-            Debug.WriteLine("AppIcon_MouseMove acionado.");
+            if (e.LeftButton != MouseButtonState.Pressed || _isDragging) return;
 
-            if (e.LeftButton == MouseButtonState.Pressed && !_isDragging)
+            Point mousePos = e.GetPosition(null);
+            Vector diff = _startPoint - mousePos;
+
+            if (Math.Abs(diff.X) > 10 || Math.Abs(diff.Y) > 10)
             {
-                Point mousePos = e.GetPosition(null);
-                Vector diff = _startPoint - mousePos;
+                _isDragging = true;
 
-                Debug.WriteLine($"  _startPoint = {_startPoint}, mousePos = {mousePos}, diff = {diff}");
-                Debug.WriteLine($"  Condição de arrasto: (Abs(diff.X) > 10 = {Math.Abs(diff.X) > 10}) || (Abs(diff.Y) > 10 = {Math.Abs(diff.Y) > 10})");
-
-                if (Math.Abs(diff.X) > 10 || Math.Abs(diff.Y) > 10)
+                if (this.DataContext is AppIconViewModel appIconToDrag &&
+                    FindParent<MenuGroupView>(this)?.DataContext is MenuGroupViewModel sourceGroup)
                 {
-                    Debug.WriteLine("  *** Condição de arrasto ATINGIDA! ***");
-                    _isDragging = true;
+                    ((FrameworkElement)sender).ReleaseMouseCapture();
 
-                    AppIconViewModel appIconToDrag = this.DataContext as AppIconViewModel;
-                    Debug.WriteLine($"DataContext do AppIconView: {this.DataContext?.GetType().Name ?? "NULL"}, Valor: {this.DataContext}");
-                    Debug.WriteLine($"AppIconToDrag: {appIconToDrag?.Name ?? "NULL"}");
-
-                    MenuGroupView parentMenuGroupView = FindParent<MenuGroupView>(this);
-                    Debug.WriteLine($"Parent MenuGroupView (objeto): {parentMenuGroupView?.GetType().Name ?? "NULL"}");
-                    MenuGroupViewModel sourceGroup = parentMenuGroupView?.DataContext as MenuGroupViewModel;
-                    Debug.WriteLine($"SourceGroup: {sourceGroup?.Name ?? "NULL"}");
-
-                    if (appIconToDrag != null && sourceGroup != null)
+                    var dragData = new DataObject("SlideDockAppIcon", new AppIconDragData
                     {
-                        Debug.WriteLine($"Iniciando arrasto: App='{appIconToDrag.Name}' do grupo='{sourceGroup.Name}'");
+                        AppIcon = appIconToDrag,
+                        SourceGroup = sourceGroup
+                    });
 
-                        ((FrameworkElement)sender).ReleaseMouseCapture();
-
-                        DataObject dragData = new DataObject("SlideDockAppIcon", new AppIconDragData
-                        {
-                            AppIcon = appIconToDrag,
-                            SourceGroup = sourceGroup
-                        });
-
-                        try
-                        {
-                            DragDropEffects result = DragDrop.DoDragDrop(this, dragData, DragDropEffects.Move);
-                            Debug.WriteLine($"Drag operation completed with result: {result}");
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine($"Drag operation failed: {ex.Message}");
-                        }
-                        finally
-                        {
-                            _isDragging = false;
-                        }
-
-                        e.Handled = true;
+                    try
+                    {
+                        DragDrop.DoDragDrop(this, dragData, DragDropEffects.Move);
                     }
+                    finally
+                    {
+                        _isDragging = false;
+                    }
+
+                    e.Handled = true;
                 }
             }
         }
@@ -112,6 +83,10 @@ namespace SlideDock.Views
             }
         }
 
+        #endregion
+
+        #region Helpers Visuais
+
         private static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);
@@ -119,9 +94,11 @@ namespace SlideDock.Views
 
             if (parentObject is T parent)
                 return parent;
-            else
-                return FindParent<T>(parentObject);
+
+            return FindParent<T>(parentObject);
         }
+
+        #endregion
     }
 
     public class AppIconDragData

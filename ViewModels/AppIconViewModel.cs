@@ -91,7 +91,7 @@ namespace SlideDock.ViewModels
         // Verificação de caminho não vazio
         if (!string.IsNullOrEmpty(ExecutablePath))
         {
-            BitmapSource icon = null;
+            BitmapSource? icon = null;
 
             // Verifica se o item (arquivo ou pasta) existe antes de tentar carregar o ícone
             if (ItemType == DockItemType.Folder && Directory.Exists(ExecutablePath))
@@ -229,8 +229,8 @@ namespace SlideDock.ViewModels
             RemoveRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

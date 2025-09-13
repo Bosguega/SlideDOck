@@ -19,7 +19,7 @@ namespace SlideDock.ViewModels
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IDialogService _dialogService;
 
-        public ObservableCollection<MenuGroupViewModel> MenuGroups { get; } = new();
+        public ObservableCollection<MenuGroupViewModel> MenuGroups { get; } = [];
 
         public ICommand AddMenuGroupCommand { get; }
         public ICommand RemoveMenuGroupCommand { get; }
@@ -131,8 +131,8 @@ namespace SlideDock.ViewModels
             _mainViewModel.SaveConfiguration();
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
