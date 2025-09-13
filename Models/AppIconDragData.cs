@@ -5,8 +5,8 @@ namespace SlideDock.Models
 {
     public class AppIconDragData
     {
-        public AppIconViewModel AppIcon { get; set; }
-        public MenuGroupViewModel SourceGroup { get; set; }
+        public AppIconViewModel? AppIcon { get; set; }
+        public MenuGroupViewModel? SourceGroup { get; set; }
         public Point InitialMousePosition { get; set; }
     }
 }

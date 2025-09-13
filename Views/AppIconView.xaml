@@ -4,21 +4,22 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:viewmodels="clr-namespace:SlideDock.ViewModels"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:dd="clr-namespace:SlideDock.Behaviors.DragDrop"
              mc:Ignorable="d"
              d:DesignHeight="50" d:DesignWidth="50"
              DataContext="{Binding}">
     <!-- Using Border instead of Button to avoid mouse event conflicts with drag and drop -->
     <Border Name="AppIconBorder" 
-            PreviewMouseLeftButtonDown="AppIcon_PreviewMouseLeftButtonDown"
-            PreviewMouseLeftButtonUp="AppIcon_PreviewMouseLeftButtonUp"
-            MouseMove="AppIcon_MouseMove"
-            MouseLeave="AppIcon_MouseLeave"
             Background="Transparent"
             ToolTip="{Binding Name}"
             Cursor="Hand"
             Margin="4"
             Padding="6"
             CornerRadius="8">
+        <b:Interaction.Behaviors>
+            <dd:DragBehavior Command="{Binding DragCommand}" />
+        </b:Interaction.Behaviors>
         <Border.Style>
             <Style TargetType="Border">
                 <!-- Enhanced hover effects with smooth transitions and subtle shadow -->

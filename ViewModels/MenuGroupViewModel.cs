@@ -107,7 +107,7 @@ namespace SlideDock.ViewModels
 
             _model.AppIcons.Add(appIcon);
 
-            var appIconViewModel = new AppIconViewModel(appIcon, _dialogService);
+            var appIconViewModel = new AppIconViewModel(appIcon, _dialogService, this);
             appIconViewModel.RemoveRequested += (s, e) => RemoveApp(appIconViewModel);
             appIconViewModel.OpenFolderRequested += (s, e) => OpenAppFolder(appIconViewModel);
             AppIcons.Add(appIconViewModel);
@@ -239,7 +239,7 @@ namespace SlideDock.ViewModels
             AppIcons.Clear();
             foreach (var appIcon in _model.AppIcons)
             {
-                var appIconViewModel = new AppIconViewModel(appIcon, _dialogService);
+                var appIconViewModel = new AppIconViewModel(appIcon, _dialogService, this);
                 appIconViewModel.RemoveRequested += (s, e) => RemoveApp(appIconViewModel);
                 appIconViewModel.OpenFolderRequested += (s, e) => OpenAppFolder(appIconViewModel);
                 AppIcons.Add(appIconViewModel);

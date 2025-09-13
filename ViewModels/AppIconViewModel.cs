@@ -10,6 +10,7 @@ using SlideDock.Utils;
 using System;
 using System.Windows; // Para MessageBox (fallback)
 using SlideDock.Services; // Para IDialogService
+using System.Windows.Data; // Para DataObject
 
 namespace SlideDock.ViewModels
 {
@@ -18,10 +19,15 @@ namespace SlideDock.ViewModels
         private readonly AppIcon _model;
         // Campo para o serviço injetado
         private readonly IDialogService _dialogService;
+        // Campo para o ViewModel do grupo pai
+        private readonly MenuGroupViewModel _parentGroup;
+        // Campo para o serviço de UI de arrastar e soltar
+        private IDragDropUIService? _dragDropUIService;
 
         public ICommand LaunchAppCommand { get; }
         public ICommand RemoveAppCommand { get; }
         public ICommand OpenFolderCommand { get; } // Agora serve para "Abrir Local"
+        public ICommand DragCommand { get; }
 
         public event EventHandler RemoveRequested;
         public event EventHandler OpenFolderRequested; // Agora serve para "Abrir Local"
@@ -31,15 +37,18 @@ namespace SlideDock.ViewModels
         /// </summary>
         /// <param name="model">O modelo de dados AppIcon.</param>
         /// <param name="dialogService">Serviço para exibir diálogos.</param>
-        public AppIconViewModel(AppIcon model, IDialogService dialogService)
+        /// <param name="parentGroup">O ViewModel do grupo pai.</param>
+        public AppIconViewModel(AppIcon model, IDialogService dialogService, MenuGroupViewModel parentGroup)
         {
             _model = model ?? throw new ArgumentNullException(nameof(model));
             // Atribui o serviço injetado
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            _parentGroup = parentGroup ?? throw new ArgumentNullException(nameof(parentGroup));
 
             LaunchAppCommand = new RelayCommand(_ => LaunchApp());
             RemoveAppCommand = new RelayCommand(_ => OnRemoveRequested());
             OpenFolderCommand = new RelayCommand(_ => OnOpenFolderRequested()); // Agora "Abrir Local"
+            DragCommand = new RelayCommand(OnDragStart);
             LoadIcon();
         }
 
@@ -82,6 +91,11 @@ namespace SlideDock.ViewModels
                 _model.ItemType = value;
                 OnPropertyChanged();
             }
+        }
+
+        public void SetDragDropUIService(IDragDropUIService service)
+        {
+            _dragDropUIService = service;
         }
 
         private void LoadIcon()
@@ -233,6 +247,24 @@ namespace SlideDock.ViewModels
         protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void OnDragStart(object? parameter)
+        {
+            if (parameter is DragStartInfo dragStartInfo && dragStartInfo.ViewModel is AppIconViewModel draggedAppIcon)
+            {
+                var dragData = new AppIconDragData
+                {
+                    AppIcon = draggedAppIcon,
+                    SourceGroup = _parentGroup,
+                    InitialMousePosition = Mouse.GetPosition(Application.Current.MainWindow) // Get initial mouse position relative to main window
+                };
+
+                DragDrop.DoDragDrop(
+                    dragStartInfo.DragSource, 
+                    new DataObject("SlideDockAppIcon", dragData),
+                    DragDropEffects.Move);
+            }
         }
     }
 }

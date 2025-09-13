@@ -2,6 +2,7 @@ using Microsoft.Xaml.Behaviors;
 using System;
 using System.Windows;
 using System.Windows.Input;
+using SlideDock.Models;
 
 namespace SlideDock.Behaviors.DragDrop
 {
@@ -51,11 +52,16 @@ namespace SlideDock.Behaviors.DragDrop
                     {
                         if (AssociatedObject is FrameworkElement fe)
                         {
-                            Command.Execute(fe.DataContext);
+                            var dragStartInfo = new DragStartInfo
+                            {
+                                ViewModel = fe.DataContext,
+                                DragSource = fe
+                            };
+                            Command.Execute(dragStartInfo);
                         }
                         else
                         {
-                            Command.Execute(null); // Fallback if DataContext is not available
+                            Command.Execute(new DragStartInfo { ViewModel = null, DragSource = null }); // Fallback
                         }
                     }
                     // We don't start the actual drag drop operation here, 
