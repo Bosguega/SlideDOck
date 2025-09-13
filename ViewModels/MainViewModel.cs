@@ -19,13 +19,16 @@ namespace SlideDock.ViewModels
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IDialogService _dialogService;
         private DockPosition _dockPosition;
+        private bool _isSettingsMenuOpen;
 
         public DockManagerViewModel DockManager { get; }
+        public SettingsMenuViewModel SettingsMenu { get; }
 
         public ICommand ToggleDockCommand { get; }
         public ICommand CloseApplicationCommand { get; }
         public ICommand DropFilesCommand { get; }
         public ICommand DragOverFilesCommand { get; }
+        public ICommand ToggleSettingsCommand { get; }
 
         public MainViewModel()
         {
@@ -35,12 +38,27 @@ namespace SlideDock.ViewModels
 
             // Passa os serviços injetados para o DockManagerViewModel
             DockManager = new DockManagerViewModel(this, _fileInteractionService, _dialogService);
+            SettingsMenu = new SettingsMenuViewModel();
+            SettingsMenu.CloseRequested += (s, e) => IsSettingsMenuOpen = false;
+            SettingsMenu.PropertyChanged += SettingsMenu_PropertyChanged;
 
             ToggleDockCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             CloseApplicationCommand = new RelayCommand(_ => CloseApplication());
             DropFilesCommand = new RelayCommand(OnDropFiles);
             DragOverFilesCommand = new RelayCommand(OnDragOverFiles);
+            ToggleSettingsCommand = new RelayCommand(_ => IsSettingsMenuOpen = !IsSettingsMenuOpen);
             LoadConfiguration();
+        }
+
+        private void SettingsMenu_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(SettingsMenu.IsAlwaysOnTop))
+            {
+                if (Application.Current.MainWindow is Window mainWindow)
+                {
+                    mainWindow.Topmost = SettingsMenu.IsAlwaysOnTop;
+                }
+            }
         }
 
         public bool IsExpanded
@@ -49,6 +67,16 @@ namespace SlideDock.ViewModels
             set
             {
                 _isExpanded = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsSettingsMenuOpen
+        {
+            get => _isSettingsMenuOpen;
+            set
+            {
+                _isSettingsMenuOpen = value;
                 OnPropertyChanged();
             }
         }
