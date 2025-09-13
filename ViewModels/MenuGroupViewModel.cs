@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Collections.Specialized;
 using System.Windows.Input;
 
 namespace SlideDock.ViewModels
@@ -19,6 +20,7 @@ namespace SlideDock.ViewModels
         private readonly MainViewModel _mainViewModel;
         private readonly IDialogService _dialogService;
         private readonly IFileInteractionService _fileInteractionService;
+        private IDragDropUIService? _dragDropUIService;
 
         public ObservableCollection<AppIconViewModel> AppIcons { get; } = [];
 
@@ -26,6 +28,8 @@ namespace SlideDock.ViewModels
         public ICommand AddAppCommand { get; }
         public ICommand RemoveGroupCommand { get; }
         public ICommand AddFolderCommand { get; }
+        public ICommand DropCommand { get; }
+        public ICommand DragOverCommand { get; }
 
         public MenuGroupViewModel(MenuGroup model,
                                   MainViewModel mainViewModel,
@@ -36,11 +40,14 @@ namespace SlideDock.ViewModels
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _fileInteractionService = fileInteractionService ?? throw new ArgumentNullException(nameof(fileInteractionService));
+            // _dragDropUIService = dragDropUIService ?? throw new ArgumentNullException(nameof(dragDropUIService)); // Removed from constructor
 
             ToggleExpandCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             AddAppCommand = new RelayCommand(_ => AddAppFromFileDialog());
             RemoveGroupCommand = new RelayCommand(_ => _mainViewModel.DockManager.RemoveMenuGroup(this));
             AddFolderCommand = new RelayCommand(_ => AddFolderFromDialog());
+            DropCommand = new RelayCommand(OnDrop);
+            DragOverCommand = new RelayCommand(OnDragOver);
 
             SyncAppIconsFromModel();
         }
@@ -249,5 +256,88 @@ namespace SlideDock.ViewModels
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         #endregion
+
+        #region Drag and Drop Commands
+
+        private void OnDrop(object parameter)
+        {
+            if (parameter is not DragEventArgs e) return;
+
+            if (e.Data.GetDataPresent("SlideDockAppIcon"))
+            {
+                HandleDragBetweenGroupsOrReorder(e);
+            }
+            else if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                HandleExternalFileDrop(e);
+            }
+            _dragDropUIService?.HideDropIndicator();
+        }
+
+        private void OnDragOver(object parameter)
+        {
+            if (parameter is not DragEventArgs e) return;
+
+            if (e.Data.GetDataPresent("SlideDockAppIcon"))
+            {
+                HandleDragOverAppIcon(e);
+                _dragDropUIService?.ShowDropIndicator(e, e.Source as DependencyObject);
+            }
+            else if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                HandleDragOverExternalFiles(e);
+                _dragDropUIService?.HideDropIndicator(); // No drop indicator for external files by default
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+                _dragDropUIService?.HideDropIndicator();
+            }
+        }
+
+        private void HandleDragBetweenGroupsOrReorder(DragEventArgs e)
+        {
+            if (e.Data.GetData("SlideDockAppIcon") is not AppIconDragData dragData) return;
+
+            if (dragData.SourceGroup == this)
+            {
+                int newIndex = _dragDropUIService?.GetDropIndex(e, this, e.Source as DependencyObject) ?? -1;
+                ReorderAppIcon(dragData.AppIcon, newIndex);
+            }
+            else
+            {
+                _mainViewModel.DockManager.MoveAppIconBetweenGroups(dragData.AppIcon, dragData.SourceGroup, this);
+            }
+        }
+
+        private void HandleExternalFileDrop(DragEventArgs e)
+        {
+            string[] files = _fileInteractionService.GetDroppedFiles(e);
+            foreach (string file in files)
+            {
+                AddAppIcon(file);
+            }
+        }
+
+        private void HandleDragOverAppIcon(DragEventArgs e)
+        {
+            if (e.Data.GetData("SlideDockAppIcon") is not AppIconDragData dragData) return;
+
+            e.Effects = dragData.SourceGroup == this ? DragDropEffects.Move : DragDropEffects.Move;
+            // if (dragData.SourceGroup == this) ShowDropIndicator(e.GetPosition(this)); // UI-specific, handled by View
+        }
+
+        private void HandleDragOverExternalFiles(DragEventArgs e)
+        {
+            string[] files = _fileInteractionService.GetDroppedFiles(e);
+            e.Effects = files.Length > 0 ? DragDropEffects.Copy : DragDropEffects.None;
+        }
+
+        #endregion
+
+        public void SetDragDropUIService(IDragDropUIService service)
+        {
+            _dragDropUIService = service;
+        }
     }
 }

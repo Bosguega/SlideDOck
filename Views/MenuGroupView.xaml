@@ -5,14 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:viewmodels="clr-namespace:SlideDock.ViewModels"
              xmlns:local="clr-namespace:SlideDock.Views"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:dd="clr-namespace:SlideDock.Behaviors.DragDrop"
              mc:Ignorable="d"
              d:DesignHeight="200" d:DesignWidth="240"
-             DataContext="{Binding}">
-    <Border Margin="2" Background="#22FFFFFF" CornerRadius="4"
-            AllowDrop="True"
-            Drop="MenuGroup_Drop"
-            DragEnter="MenuGroup_DragEnter"
-            DragOver="MenuGroup_DragOver">
+             Loaded="MenuGroupView_Loaded">
+    <Border Margin="2" Background="#22FFFFFF" CornerRadius="4">
+        <b:Interaction.Behaviors>
+            <dd:DropBehavior DropCommand="{Binding DropCommand}" DragOverCommand="{Binding DragOverCommand}" />
+        </b:Interaction.Behaviors>
         <Expander IsExpanded="{Binding IsExpanded}"
                   Background="Transparent"
                   BorderBrush="Transparent">
