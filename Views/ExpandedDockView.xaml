@@ -120,21 +120,36 @@
                 <!-- Menu superior com 3 botões -->
                 <Border Grid.Row="0" Background="#FF3E3E42" Grid.ColumnSpan="2">
                     <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Botão Sanduíche -->
+                        <Button Grid.Column="0" Style="{StaticResource IconButtonStyle}" Margin="10,0,5,0">
+                            <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
+                       Text="&#xf0c9;"  
+                       FontSize="16"
+                       Foreground="White"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"/>
+        </Button>
+
                         <!-- Título -->
-                        <TextBlock Text="SlideDock"
+                        <TextBlock Grid.Column="1"
+                   Text="SlideDock"
                    VerticalAlignment="Center"
                    HorizontalAlignment="Left"
-                   Margin="10,0,0,0"
                    Foreground="White"
                    FontWeight="Bold"
                    FontSize="14"/>
 
-                        <!-- Botões -->
-                        <StackPanel Orientation="Horizontal"
+                        <!-- Botões da direita -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Margin="0,0,10,0">
-
 
                             <!-- Adicionar Grupo -->
                             <Button Style="{StaticResource IconButtonStyle}"
@@ -143,9 +158,7 @@
                                 <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
                            Text="&#xf067;" 
                            FontSize="16"
-                           Foreground="White"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
+                           Foreground="White"/>
                             </Button>
 
                             <!-- Mover Barra para Outro Lado -->
@@ -155,9 +168,7 @@
                                 <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
                            Text="&#xf0ec;" 
                            FontSize="16"
-                           Foreground="White"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
+                           Foreground="White"/>
                             </Button>
 
                             <!-- Sair / Fechar Aplicativo -->
@@ -167,14 +178,12 @@
                                 <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
                            Text="&#xf08b;"  
                            FontSize="16"
-                           Foreground="Red"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
+                           Foreground="Red"/>
                             </Button>
-
                         </StackPanel>
                     </Grid>
                 </Border>
+
 
                 <!-- Conteúdo da barra (scroll) -->
                 <ScrollViewer Grid.Row="1"
