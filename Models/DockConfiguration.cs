@@ -7,6 +7,7 @@ namespace SlideDock.Models
     {
         public bool IsExpanded { get; set; }
         public DockPosition DockPosition { get; set; }
+        public bool IsTopmost { get; set; } = false;
         public List<MenuGroupData> MenuGroups { get; set; } = [];
     }
 

@@ -1,0 +1,40 @@
+<Window x:Class="SlideDock.Views.SettingsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Configurações" Height="300" Width="400"
+        WindowStartupLocation="CenterOwner"
+        Background="#FF2D2D30" Foreground="White">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+
+		<!-- Header -->
+		<Border Grid.Row="0" Background="#FF3E3E42" Padding="10">
+			<TextBlock Text="Configurações" FontSize="16" FontWeight="Bold" />
+		</Border>
+
+		<!-- Content Area - Adicione seus controles de configuração aqui -->
+		<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="10">
+			<StackPanel>
+				<!-- <TextBlock Text="Conteúdo das configurações será adicionado aqui." Margin="0,0,0,10"/> -->
+				<!-- Exemplo de item de configuração -->
+				<!-- Binding IsTopmost ao DataContext (que será o MainViewModel) -->
+				<CheckBox Content="Sempre Visível" IsChecked="{Binding IsTopmost}" Margin="0,0,0,10" Foreground="White"/>
+				<!-- Adicione mais opções de configuração aqui no futuro -->
+			</StackPanel>
+		</ScrollViewer>
+
+		<!-- Footer com Botão Fechar -->
+		<Border Grid.Row="2" Background="#FF3E3E42" Padding="10">
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+				<Button Content="Fechar" Padding="10,5" Click="CloseButton_Click"/>
+			</StackPanel>
+		</Border>
+	</Grid>
+</Window>

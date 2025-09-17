@@ -127,14 +127,19 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Botão Sanduíche -->
-                        <Button Grid.Column="0" Style="{StaticResource IconButtonStyle}" Margin="10,0,5,0">
+                        <!-- Botão Sanduíche -->
+                        <Button Grid.Column="0"
+        Style="{StaticResource IconButtonStyle}"
+        Margin="10,0,5,0"
+        Command="{Binding OpenSettingsCommand}" >
+                            <!-- Adicionado Command Binding -->
                             <TextBlock FontFamily="pack://application:,,,/FontAwesome.WPF;component/#FontAwesome Solid"
-                       Text="&#xf0c9;"  
-                       FontSize="16"
-                       Foreground="White"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Center"/>
-        </Button>
+               Text="&#xf0c9;" 
+               FontSize="16"
+               Foreground="White"
+               VerticalAlignment="Center"
+               HorizontalAlignment="Center"/>
+</Button>
 
                         <!-- Título -->
                         <TextBlock Grid.Column="1"

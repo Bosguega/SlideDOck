@@ -1,14 +1,15 @@
 ﻿// Arquivo: ViewModels\MainViewModel.cs
-using SlideDock.Models;
 using SlideDock.Commands;
+using SlideDock.Models;
 using SlideDock.Services;
-using System.ComponentModel;
-using System.Windows.Input;
-using System.Windows;
-using System.Collections.Specialized;
-using System.Diagnostics;
 using System;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq; // Adicionado para possíveis usos futuros
+using System.Windows;
+using System.Windows.Input;
+using SlideDock.Views;  
 
 namespace SlideDock.ViewModels
 {
@@ -19,6 +20,7 @@ namespace SlideDock.ViewModels
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IDialogService _dialogService;
         private DockPosition _dockPosition;
+        private bool _isTopmost;
 
         public DockManagerViewModel DockManager { get; }
 
@@ -26,6 +28,7 @@ namespace SlideDock.ViewModels
         public ICommand CloseApplicationCommand { get; }
         public ICommand DropFilesCommand { get; }
         public ICommand DragOverFilesCommand { get; }
+        public ICommand OpenSettingsCommand { get; }
 
         public MainViewModel()
         {
@@ -40,6 +43,7 @@ namespace SlideDock.ViewModels
             CloseApplicationCommand = new RelayCommand(_ => CloseApplication());
             DropFilesCommand = new RelayCommand(OnDropFiles);
             DragOverFilesCommand = new RelayCommand(OnDragOverFiles);
+            OpenSettingsCommand = new RelayCommand(OpenSettings);
             LoadConfiguration();
         }
 
@@ -62,6 +66,27 @@ namespace SlideDock.ViewModels
                 OnPropertyChanged();
             }
         }
+        public bool IsTopmost
+        {
+            get => _isTopmost;
+            set
+            {
+                if (_isTopmost != value)
+                {
+                    _isTopmost = value;
+                    OnPropertyChanged();
+                    // Atualiza a janela principal se ela existir
+                    Application.Current.MainWindow?.Dispatcher.Invoke(() =>
+                    {
+                        if (Application.Current.MainWindow is MainWindow mainWindow)
+                        {
+                            mainWindow.Topmost = _isTopmost;
+                        }
+                    });
+                    SaveConfiguration(); // Salva a configuração sempre que o valor muda
+                }
+            }
+        }
 
         public void ToggleDockSide()
         {
@@ -77,7 +102,8 @@ namespace SlideDock.ViewModels
                 var config = new DockConfiguration
                 {
                     IsExpanded = this.IsExpanded,
-                    DockPosition = this.DockPosition
+                    DockPosition = this.DockPosition,
+                    IsTopmost = this.IsTopmost
                 };
 
                 foreach (var groupViewModel in DockManager.MenuGroups)
@@ -124,6 +150,7 @@ namespace SlideDock.ViewModels
                 // Load IsExpanded and DockPosition
                 IsExpanded = config.IsExpanded;
                 DockPosition = config.DockPosition;
+                IsTopmost = config.IsTopmost;
 
                 DockManager.MenuGroups.Clear();
 
@@ -172,6 +199,33 @@ namespace SlideDock.ViewModels
         protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void OpenSettings(object parameter)
+        {
+            // Verifica se já existe uma instância de SettingsView aberta
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window is SettingsView)
+                {
+                    // Se existir, traz para o foco
+                    window.Activate();
+                    return;
+                }
+            }
+
+            // Se não existir, cria uma nova instância
+            SettingsView settingsView = new SettingsView();
+
+            // Tenta definir o dono como a janela principal para centralizar e comportamento modal (opcional)
+            Window mainWindow = Application.Current.MainWindow;
+            if (mainWindow != null)
+            {
+                settingsView.Owner = mainWindow;
+            }
+
+            // Mostra a janela
+            settingsView.Show();
         }
 
         #region Drag and Drop Handlers
